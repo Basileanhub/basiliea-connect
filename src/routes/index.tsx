@@ -1,24 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
-
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
-export const Route = createFileRoute("/")({
-  component: Index,
-});
-
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
-}
+import { createFileRoute, Link } from '@tanstack/react-router';
+import { useState } from 'react';
+import { ArrowRight, Play, Pause, Globe2, HeartHandshake } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { pageMeta } from '@/lib/page-meta';
+import worship from '@/assets/worship.jpg';
+import bibleStudy from '@/assets/bible-study.jpg';
+export const Route=createFileRoute('/')({head:()=>pageMeta('Welcome home','Welcome to Basileia Ministries International. Discover daily devotion, Bible reading, sermons and a global family of faith.'),component:Home});
+function Home(){const [paused,setPaused]=useState(false);const resources=[{to:'/devotion' as const,label:'DAILY DEVOTION',title:'Begin your day with God.',text:'Make room for His Word. Find encouragement and truth for your daily walk.',image:bibleStudy,cta:'Read daily devotion'},{to:'/reading-plan' as const,label:'BIBLE READING PLAN',title:'Rooted in the Word.',text:'A daily rhythm of Scripture. Journey through the Bible with our monthly reading plan.',image:bibleStudy,cta:'Explore the reading plan'},{to:'/the-word' as const,label:'MESSAGES & SERMONS',title:'The Word. For your life.',text:'Listen, reflect, and grow through messages from Basileia Ministries International.',image:worship,cta:'Listen to the Word'}];return <main><section className="hero"><img src={worship} width={1920} height={1024} alt="A congregation gathered together in worship" className={`hero-image ${paused?'animation-paused':''}`}/><div className="container-main hero-content"><div className="eyebrow">One kingdom. One family. All nations.</div><h1>Welcome to<br/>Basileia Ministries<br/>International.</h1><p className="hero-description">A people shaped by His Word.<br/>A world transformed by His Kingdom.</p><div className="hero-actions"><Button asChild size="lg"><Link to="/the-word"><Play/> Explore the Word</Link></Button><Button variant="hero" asChild size="lg"><Link to="/community">Find your community <ArrowRight/></Link></Button></div></div><div className="hero-tag"><Globe2 size={16}/><span>THE GOSPEL OF THE KINGDOM · TO THE WORLD</span></div><div className="hero-controls"><Button variant="hero" size="icon" aria-label={paused?'Play welcome animation':'Pause welcome animation'} onClick={()=>setPaused(!paused)}>{paused?<Play/>:<Pause/>}</Button></div></section><section className="mission-section"><div className="container-main"><div className="section-kicker">Our mission</div><h2><span className="mission-word">Instituted by God.</span> <span className="mission-word">Sent to the world.</span></h2><p className="text-muted-foreground leading-8 max-w-3xl mx-auto text-base">Basileia Ministries International is an evangelical ministry instituted by God to proclaim the gospel of the Kingdom to every sphere of society, in every nation.</p><div className="text-primary text-xl mt-6" aria-hidden="true">✦</div></div></section><section className="section"><div className="container-main"><div className="section-intro"><div><div className="section-kicker">Nourish your spirit</div><h2>A deeper walk. Every day.</h2></div><p>Meet God in the everyday. Be renewed by His Word, and grow together in faith.</p></div><div className="resource-grid">{resources.map(r=><article className="resource" key={r.to}><Link to={r.to}><div className="resource-image"><img src={r.image} alt={r.label==='MESSAGES & SERMONS'?'Worship and teaching':'An open Bible in morning light'} width={1536} height={1024} loading="lazy"/><span className="resource-label">{r.label}</span></div></Link><div className="resource-body"><h3>{r.title}</h3><p>{r.text}</p><Link className="text-link" to={r.to}>{r.cta}<ArrowRight size={16}/></Link></div></article>)}</div></div></section><section className="invitation"><div className="container-main invitation-inner"><div><div className="section-kicker">You don't have to walk alone</div><h2>One family. Wherever you are.</h2><p>Connect with BMI Global and our communities in Ogbomoso, Ibadan, and Sweden.</p></div><Button asChild size="lg"><Link to="/community"><HeartHandshake/> Find your community <ArrowRight/></Link></Button></div></section></main>;}

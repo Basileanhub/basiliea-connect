@@ -1,0 +1,6 @@
+import { createFileRoute } from '@tanstack/react-router';
+import { Globe2, MapPin, LockKeyhole } from 'lucide-react';
+import { PageTitle, MemberNotice } from '@/components/MinistryShell';
+import { pageMeta } from '@/lib/page-meta';
+export const Route=createFileRoute('/community')({head:()=>pageMeta('BMI Community','One global family, with local communities in Ogbomoso, Ibadan and Sweden.'),component:Community});
+function Community(){return <main><PageTitle title="One family. Across the world." description="Faith grows in fellowship. Share life with BMI Global and find your local community." kicker="BMI COMMUNITY"/><section className="section"><div className="container-main"><div className="room-grid">{['BMI Global','BMI Ogbomoso','BMI Ibadan','BMI Sweden'].map((name,i)=><article className="room" key={name}>{i===0?<Globe2 className="text-primary"/>:<MapPin className="text-primary"/>}<h3>{name}</h3><p>{i===0?'Our shared gathering place for every member of the BMI family.':'A local family for prayer, encouragement, and fellowship.'}</p><span className="status flex items-center gap-2"><LockKeyhole size={13}/> {i===0?'All members':'Selected branch members'}</span></article>)}</div><MemberNotice/></div></section></main>;}
