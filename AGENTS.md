@@ -8,3 +8,7 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Use TanStack file routes for each public ministry page and shared navigation in the root shell, so every page has a direct address and metadata.
+- Keep Cloudflare calls server-side through the linked connector gateway; D1 and authenticated features must remain unavailable until verified permissions and secure identity handling are configured.
+- Use uploaded Bible assets for document reading/downloads; never label the uploaded Bower book as an NLT translation.
