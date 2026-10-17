@@ -2,7 +2,14 @@
 - [x] Build white/deep-red public pages, cinematic welcome and mission, real giving details.
 - [x] Provide KJV/NIV reading and downloads, verified with a 5.3 MB NIV download.
 - [x] Add phone-install metadata and controlled offline app-shell support; published offline verification awaits publishing.
-- [ ] Cloudflare D1 data setup — access verified; creation requires explicit resource/cost approval.
-- [ ] Email-link accounts, profiles, branch permissions and Studio — blocked by database creation approval and authentication email delivery setup.
-- [ ] Community, prayer submissions, saved notes and resource management — blocked by authenticated data layer.
+- [x] Cloudflare D1 database created as bmi-ministry (per prior confirmed setup).
+- [ ] Public Google-only accounts and password-based admin login — waiting for Google credentials and securely set admin passwords. Email/OTP membership superseded.
+- [ ] Update static header, medium-red header/footer, remove page introductions, and use footer social/copy icons.
+- [ ] Remove Community and Notepad; rename Books to Library and Announcements to Events; add Bookmarks and Sermons addresses.
+- [ ] Build ten-table D1 CMS and R2 basileia-media uploads — requires schema/bucket setup confirmation and verified R2 permissions.
+- [ ] Build admin module tabs, editable site settings, permissions and super-admin management.
+- [ ] Build Google-owned bookmarks for sermons, PDFs and Bible text; prayer moderation and live YouTube configuration.
+- [ ] Add video hero with uploaded-media fallback, overlapping weekly-message block and Events/Prayer/Library links.
+- [ ] Seed supplied branch program outlines, preacher default and editable site copy; no invented ministry resources.
+- [ ] Add provided Instagram and YouTube links to footer and Contact.
 - [ ] Real ministry video, sermons, devotions, reading plans, books and broadcast — awaiting supplied resources.
