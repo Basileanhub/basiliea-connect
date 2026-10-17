@@ -21,6 +21,7 @@ import { Route as NotesRouteImport } from './routes/notes'
 import { Route as PrayerRouteImport } from './routes/prayer'
 import { Route as ReadingPlanRouteImport } from './routes/reading-plan'
 import { Route as TheWordRouteImport } from './routes/the-word'
+import { Route as ApiPublicGoogleCallbackRouteImport } from './routes/api/public/google-callback'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -82,6 +83,11 @@ const TheWordRoute = TheWordRouteImport.update({
   path: '/the-word',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicGoogleCallbackRoute = ApiPublicGoogleCallbackRouteImport.update({
+  id: '/api/public/google-callback',
+  path: '/api/public/google-callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -96,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/prayer': typeof PrayerRoute
   '/reading-plan': typeof ReadingPlanRoute
   '/the-word': typeof TheWordRoute
+  '/api/public/google-callback': typeof ApiPublicGoogleCallbackRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -110,6 +117,7 @@ export interface FileRoutesByTo {
   '/prayer': typeof PrayerRoute
   '/reading-plan': typeof ReadingPlanRoute
   '/the-word': typeof TheWordRoute
+  '/api/public/google-callback': typeof ApiPublicGoogleCallbackRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -125,6 +133,7 @@ export interface FileRoutesById {
   '/prayer': typeof PrayerRoute
   '/reading-plan': typeof ReadingPlanRoute
   '/the-word': typeof TheWordRoute
+  '/api/public/google-callback': typeof ApiPublicGoogleCallbackRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -141,6 +150,7 @@ export interface FileRouteTypes {
     | '/prayer'
     | '/reading-plan'
     | '/the-word'
+    | '/api/public/google-callback'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -155,6 +165,7 @@ export interface FileRouteTypes {
     | '/prayer'
     | '/reading-plan'
     | '/the-word'
+    | '/api/public/google-callback'
   id:
     | '__root__'
     | '/'
@@ -169,6 +180,7 @@ export interface FileRouteTypes {
     | '/prayer'
     | '/reading-plan'
     | '/the-word'
+    | '/api/public/google-callback'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -184,6 +196,7 @@ export interface RootRouteChildren {
   PrayerRoute: typeof PrayerRoute
   ReadingPlanRoute: typeof ReadingPlanRoute
   TheWordRoute: typeof TheWordRoute
+  ApiPublicGoogleCallbackRoute: typeof ApiPublicGoogleCallbackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -272,6 +285,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TheWordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/google-callback': {
+      id: '/api/public/google-callback'
+      path: '/api/public/google-callback'
+      fullPath: '/api/public/google-callback'
+      preLoaderRoute: typeof ApiPublicGoogleCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -288,6 +308,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrayerRoute: PrayerRoute,
   ReadingPlanRoute: ReadingPlanRoute,
   TheWordRoute: TheWordRoute,
+  ApiPublicGoogleCallbackRoute: ApiPublicGoogleCallbackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
