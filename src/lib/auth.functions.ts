@@ -3,11 +3,11 @@ import { z } from 'zod';
 export const adminLogin=createServerFn({method:'POST'}).inputValidator(z.object({email:z.string().email(),password:z.string().min(1).max(128)})).handler(async({data})=>{
  const {query,sessionConfig}=await import('./cloudflare.server');const {compare,hash}=await import('bcryptjs');const {updateSession,setResponseHeader}=await import('@tanstack/react-start/server');setResponseHeader('Cache-Control','no-store');
  const rows=await query('SELECT id,email,password_hash,active FROM admins WHERE email=?',[data.email.trim().toLowerCase()]);const row=rows[0];
- let stored=typeof row?.password_hash==='string'?row.password_hash:'';
- if(row&&!stored){const initial=row.email==='olofinoflife@gmail.com'?process.env['BMI_INITIAL_ADMIN_PASSWORD']:row.email==='basileiaministriesfinances@gmail.com'?process.env['BMI_FINANCE_ADMIN_PASSWORD']:undefined;if(initial){stored=await hash(initial,12);await query('UPDATE admins SET password_hash=?,password=\'\' WHERE id=? AND password_hash IS NULL',[stored,row.id]);}}
+ let stored=typeof row?.['password_hash']==='string'?row['password_hash']:'';
+ if(row&&!stored){const initial=row['email']==='olofinoflife@gmail.com'?process.env['BMI_INITIAL_ADMIN_PASSWORD']:row['email']==='basileiaministriesfinances@gmail.com'?process.env['BMI_FINANCE_ADMIN_PASSWORD']:undefined;if(initial){stored=await hash(initial,12);await query('UPDATE admins SET password_hash=?,password=\'\' WHERE id=? AND password_hash IS NULL',[stored,row['id']]);}}
  if(!stored)return {ok:false,error:'Administrator passwords have not been securely configured yet.'};
- if(!row||!row.active||!await compare(data.password,stored))return {ok:false,error:'Email or password is incorrect.'};
- await updateSession(sessionConfig(),{adminId:Number(row.id),userId:undefined});return {ok:true,error:''};
+ if(!row||!row['active']||!await compare(data.password,stored))return {ok:false,error:'Email or password is incorrect.'};
+ await updateSession(sessionConfig(),{adminId:Number(row['id']),userId:undefined});return {ok:true,error:''};
 });
 export const signOut=createServerFn({method:'POST'}).handler(async()=>{const {sessionConfig}=await import('./cloudflare.server');const {clearSession}=await import('@tanstack/react-start/server');await clearSession(sessionConfig());return {ok:true};});
 export const startGoogle=createServerFn({method:'POST'}).handler(async()=>{

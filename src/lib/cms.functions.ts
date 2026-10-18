@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { modules, isModule } from './cms-model';
 export const publicContent=createServerFn({method:'GET'}).handler(async()=>{
  const {query}=await import('./cloudflare.server');
- const settings=Object.fromEntries((await query('SELECT key,value FROM settings')).map(row=>[String(row.key),String(row.value??'')]));
+ const settings=Object.fromEntries((await query('SELECT key,value FROM settings')).map(row=>[String(row['key']),String(row['value']??'')]));
  const [devotions,sermons,events,library,reading_plans,downloads,broadcasts]=await Promise.all([
  query('SELECT * FROM devotions WHERE is_published=1 ORDER BY date DESC LIMIT 100'),query('SELECT * FROM sermons WHERE is_published=1 ORDER BY date DESC LIMIT 100'),query('SELECT * FROM events ORDER BY is_pinned DESC,created_at DESC LIMIT 100'),query('SELECT * FROM library ORDER BY published_at DESC LIMIT 100'),query('SELECT * FROM reading_plans ORDER BY date DESC LIMIT 100'),query('SELECT * FROM downloads ORDER BY id DESC LIMIT 100'),query('SELECT * FROM broadcasts ORDER BY id DESC LIMIT 10')]);
  return {settings,devotions,sermons,events,library,reading_plans,downloads,broadcasts};
