@@ -10,27 +10,24 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AnnouncementsRouteImport } from './routes/announcements'
 import { Route as BibleRouteImport } from './routes/bible'
-import { Route as BooksRouteImport } from './routes/books'
-import { Route as CommunityRouteImport } from './routes/community'
+import { Route as BookmarksRouteImport } from './routes/bookmarks'
 import { Route as DevotionRouteImport } from './routes/devotion'
 import { Route as DownloadsRouteImport } from './routes/downloads'
+import { Route as EventsRouteImport } from './routes/events'
+import { Route as LibraryRouteImport } from './routes/library'
 import { Route as LiveRouteImport } from './routes/live'
-import { Route as NotesRouteImport } from './routes/notes'
 import { Route as PrayerRouteImport } from './routes/prayer'
 import { Route as ReadingPlanRouteImport } from './routes/reading-plan'
+import { Route as SermonsRouteImport } from './routes/sermons'
 import { Route as TheWordRouteImport } from './routes/the-word'
+import { Route as ApiMediaUploadRouteImport } from './routes/api/media.upload'
 import { Route as ApiPublicGoogleCallbackRouteImport } from './routes/api/public/google-callback'
+import { Route as ApiMediaObjectSplatRouteImport } from './routes/api/media.object.$'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AnnouncementsRoute = AnnouncementsRouteImport.update({
-  id: '/announcements',
-  path: '/announcements',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BibleRoute = BibleRouteImport.update({
@@ -38,14 +35,9 @@ const BibleRoute = BibleRouteImport.update({
   path: '/bible',
   getParentRoute: () => rootRouteImport,
 } as any)
-const BooksRoute = BooksRouteImport.update({
-  id: '/books',
-  path: '/books',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CommunityRoute = CommunityRouteImport.update({
-  id: '/community',
-  path: '/community',
+const BookmarksRoute = BookmarksRouteImport.update({
+  id: '/bookmarks',
+  path: '/bookmarks',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DevotionRoute = DevotionRouteImport.update({
@@ -58,14 +50,19 @@ const DownloadsRoute = DownloadsRouteImport.update({
   path: '/downloads',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EventsRoute = EventsRouteImport.update({
+  id: '/events',
+  path: '/events',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LibraryRoute = LibraryRouteImport.update({
+  id: '/library',
+  path: '/library',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LiveRoute = LiveRouteImport.update({
   id: '/live',
   path: '/live',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const NotesRoute = NotesRouteImport.update({
-  id: '/notes',
-  path: '/notes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrayerRoute = PrayerRouteImport.update({
@@ -78,9 +75,19 @@ const ReadingPlanRoute = ReadingPlanRouteImport.update({
   path: '/reading-plan',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SermonsRoute = SermonsRouteImport.update({
+  id: '/sermons',
+  path: '/sermons',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TheWordRoute = TheWordRouteImport.update({
   id: '/the-word',
   path: '/the-word',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiMediaUploadRoute = ApiMediaUploadRouteImport.update({
+  id: '/api/media/upload',
+  path: '/api/media/upload',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicGoogleCallbackRoute = ApiPublicGoogleCallbackRouteImport.update({
@@ -88,115 +95,134 @@ const ApiPublicGoogleCallbackRoute = ApiPublicGoogleCallbackRouteImport.update({
   path: '/api/public/google-callback',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiMediaObjectSplatRoute = ApiMediaObjectSplatRouteImport.update({
+  id: '/api/media/object/$',
+  path: '/api/media/object/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/announcements': typeof AnnouncementsRoute
   '/bible': typeof BibleRoute
-  '/books': typeof BooksRoute
-  '/community': typeof CommunityRoute
+  '/bookmarks': typeof BookmarksRoute
   '/devotion': typeof DevotionRoute
   '/downloads': typeof DownloadsRoute
+  '/events': typeof EventsRoute
+  '/library': typeof LibraryRoute
   '/live': typeof LiveRoute
-  '/notes': typeof NotesRoute
   '/prayer': typeof PrayerRoute
   '/reading-plan': typeof ReadingPlanRoute
+  '/sermons': typeof SermonsRoute
   '/the-word': typeof TheWordRoute
+  '/api/media/upload': typeof ApiMediaUploadRoute
   '/api/public/google-callback': typeof ApiPublicGoogleCallbackRoute
+  '/api/media/object/$': typeof ApiMediaObjectSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/announcements': typeof AnnouncementsRoute
   '/bible': typeof BibleRoute
-  '/books': typeof BooksRoute
-  '/community': typeof CommunityRoute
+  '/bookmarks': typeof BookmarksRoute
   '/devotion': typeof DevotionRoute
   '/downloads': typeof DownloadsRoute
+  '/events': typeof EventsRoute
+  '/library': typeof LibraryRoute
   '/live': typeof LiveRoute
-  '/notes': typeof NotesRoute
   '/prayer': typeof PrayerRoute
   '/reading-plan': typeof ReadingPlanRoute
+  '/sermons': typeof SermonsRoute
   '/the-word': typeof TheWordRoute
+  '/api/media/upload': typeof ApiMediaUploadRoute
   '/api/public/google-callback': typeof ApiPublicGoogleCallbackRoute
+  '/api/media/object/$': typeof ApiMediaObjectSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/announcements': typeof AnnouncementsRoute
   '/bible': typeof BibleRoute
-  '/books': typeof BooksRoute
-  '/community': typeof CommunityRoute
+  '/bookmarks': typeof BookmarksRoute
   '/devotion': typeof DevotionRoute
   '/downloads': typeof DownloadsRoute
+  '/events': typeof EventsRoute
+  '/library': typeof LibraryRoute
   '/live': typeof LiveRoute
-  '/notes': typeof NotesRoute
   '/prayer': typeof PrayerRoute
   '/reading-plan': typeof ReadingPlanRoute
+  '/sermons': typeof SermonsRoute
   '/the-word': typeof TheWordRoute
+  '/api/media/upload': typeof ApiMediaUploadRoute
   '/api/public/google-callback': typeof ApiPublicGoogleCallbackRoute
+  '/api/media/object/$': typeof ApiMediaObjectSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/announcements'
     | '/bible'
-    | '/books'
-    | '/community'
+    | '/bookmarks'
     | '/devotion'
     | '/downloads'
+    | '/events'
+    | '/library'
     | '/live'
-    | '/notes'
     | '/prayer'
     | '/reading-plan'
+    | '/sermons'
     | '/the-word'
+    | '/api/media/upload'
     | '/api/public/google-callback'
+    | '/api/media/object/$'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/announcements'
     | '/bible'
-    | '/books'
-    | '/community'
+    | '/bookmarks'
     | '/devotion'
     | '/downloads'
+    | '/events'
+    | '/library'
     | '/live'
-    | '/notes'
     | '/prayer'
     | '/reading-plan'
+    | '/sermons'
     | '/the-word'
+    | '/api/media/upload'
     | '/api/public/google-callback'
+    | '/api/media/object/$'
   id:
     | '__root__'
     | '/'
-    | '/announcements'
     | '/bible'
-    | '/books'
-    | '/community'
+    | '/bookmarks'
     | '/devotion'
     | '/downloads'
+    | '/events'
+    | '/library'
     | '/live'
-    | '/notes'
     | '/prayer'
     | '/reading-plan'
+    | '/sermons'
     | '/the-word'
+    | '/api/media/upload'
     | '/api/public/google-callback'
+    | '/api/media/object/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AnnouncementsRoute: typeof AnnouncementsRoute
   BibleRoute: typeof BibleRoute
-  BooksRoute: typeof BooksRoute
-  CommunityRoute: typeof CommunityRoute
+  BookmarksRoute: typeof BookmarksRoute
   DevotionRoute: typeof DevotionRoute
   DownloadsRoute: typeof DownloadsRoute
+  EventsRoute: typeof EventsRoute
+  LibraryRoute: typeof LibraryRoute
   LiveRoute: typeof LiveRoute
-  NotesRoute: typeof NotesRoute
   PrayerRoute: typeof PrayerRoute
   ReadingPlanRoute: typeof ReadingPlanRoute
+  SermonsRoute: typeof SermonsRoute
   TheWordRoute: typeof TheWordRoute
+  ApiMediaUploadRoute: typeof ApiMediaUploadRoute
   ApiPublicGoogleCallbackRoute: typeof ApiPublicGoogleCallbackRoute
+  ApiMediaObjectSplatRoute: typeof ApiMediaObjectSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -208,13 +234,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/announcements': {
-      id: '/announcements'
-      path: '/announcements'
-      fullPath: '/announcements'
-      preLoaderRoute: typeof AnnouncementsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/bible': {
       id: '/bible'
       path: '/bible'
@@ -222,18 +241,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BibleRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/books': {
-      id: '/books'
-      path: '/books'
-      fullPath: '/books'
-      preLoaderRoute: typeof BooksRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/community': {
-      id: '/community'
-      path: '/community'
-      fullPath: '/community'
-      preLoaderRoute: typeof CommunityRouteImport
+    '/bookmarks': {
+      id: '/bookmarks'
+      path: '/bookmarks'
+      fullPath: '/bookmarks'
+      preLoaderRoute: typeof BookmarksRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/devotion': {
@@ -250,18 +262,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DownloadsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/events': {
+      id: '/events'
+      path: '/events'
+      fullPath: '/events'
+      preLoaderRoute: typeof EventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/library': {
+      id: '/library'
+      path: '/library'
+      fullPath: '/library'
+      preLoaderRoute: typeof LibraryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/live': {
       id: '/live'
       path: '/live'
       fullPath: '/live'
       preLoaderRoute: typeof LiveRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/notes': {
-      id: '/notes'
-      path: '/notes'
-      fullPath: '/notes'
-      preLoaderRoute: typeof NotesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/prayer': {
@@ -278,11 +297,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReadingPlanRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sermons': {
+      id: '/sermons'
+      path: '/sermons'
+      fullPath: '/sermons'
+      preLoaderRoute: typeof SermonsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/the-word': {
       id: '/the-word'
       path: '/the-word'
       fullPath: '/the-word'
       preLoaderRoute: typeof TheWordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/media/upload': {
+      id: '/api/media/upload'
+      path: '/api/media/upload'
+      fullPath: '/api/media/upload'
+      preLoaderRoute: typeof ApiMediaUploadRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/google-callback': {
@@ -292,23 +325,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicGoogleCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/media/object/$': {
+      id: '/api/media/object/$'
+      path: '/api/media/object/$'
+      fullPath: '/api/media/object/$'
+      preLoaderRoute: typeof ApiMediaObjectSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AnnouncementsRoute: AnnouncementsRoute,
   BibleRoute: BibleRoute,
-  BooksRoute: BooksRoute,
-  CommunityRoute: CommunityRoute,
+  BookmarksRoute: BookmarksRoute,
   DevotionRoute: DevotionRoute,
   DownloadsRoute: DownloadsRoute,
+  EventsRoute: EventsRoute,
+  LibraryRoute: LibraryRoute,
   LiveRoute: LiveRoute,
-  NotesRoute: NotesRoute,
   PrayerRoute: PrayerRoute,
   ReadingPlanRoute: ReadingPlanRoute,
+  SermonsRoute: SermonsRoute,
   TheWordRoute: TheWordRoute,
+  ApiMediaUploadRoute: ApiMediaUploadRoute,
   ApiPublicGoogleCallbackRoute: ApiPublicGoogleCallbackRoute,
+  ApiMediaObjectSplatRoute: ApiMediaObjectSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
