@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BibleRouteImport } from './routes/bible'
 import { Route as BookmarksRouteImport } from './routes/bookmarks'
+import { Route as ContactRouteImport } from './routes/contact'
 import { Route as DevotionRouteImport } from './routes/devotion'
 import { Route as DownloadsRouteImport } from './routes/downloads'
 import { Route as EventsRouteImport } from './routes/events'
@@ -21,6 +22,9 @@ import { Route as PrayerRouteImport } from './routes/prayer'
 import { Route as ReadingPlanRouteImport } from './routes/reading-plan'
 import { Route as SermonsRouteImport } from './routes/sermons'
 import { Route as TheWordRouteImport } from './routes/the-word'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminLoginRouteImport } from './routes/admin/login'
+import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
 import { Route as ApiMediaUploadRouteImport } from './routes/api/media.upload'
 import { Route as ApiPublicGoogleCallbackRouteImport } from './routes/api/public/google-callback'
 import { Route as ApiMediaObjectSplatRouteImport } from './routes/api/media.object.$'
@@ -38,6 +42,11 @@ const BibleRoute = BibleRouteImport.update({
 const BookmarksRoute = BookmarksRouteImport.update({
   id: '/bookmarks',
   path: '/bookmarks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DevotionRoute = DevotionRouteImport.update({
@@ -85,6 +94,21 @@ const TheWordRoute = TheWordRouteImport.update({
   path: '/the-word',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin/login',
+  path: '/admin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/admin/settings',
+  path: '/admin/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiMediaUploadRoute = ApiMediaUploadRouteImport.update({
   id: '/api/media/upload',
   path: '/api/media/upload',
@@ -105,6 +129,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/bible': typeof BibleRoute
   '/bookmarks': typeof BookmarksRoute
+  '/contact': typeof ContactRoute
   '/devotion': typeof DevotionRoute
   '/downloads': typeof DownloadsRoute
   '/events': typeof EventsRoute
@@ -114,6 +139,9 @@ export interface FileRoutesByFullPath {
   '/reading-plan': typeof ReadingPlanRoute
   '/sermons': typeof SermonsRoute
   '/the-word': typeof TheWordRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/': typeof AdminIndexRoute
   '/api/media/upload': typeof ApiMediaUploadRoute
   '/api/public/google-callback': typeof ApiPublicGoogleCallbackRoute
   '/api/media/object/$': typeof ApiMediaObjectSplatRoute
@@ -122,6 +150,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/bible': typeof BibleRoute
   '/bookmarks': typeof BookmarksRoute
+  '/contact': typeof ContactRoute
   '/devotion': typeof DevotionRoute
   '/downloads': typeof DownloadsRoute
   '/events': typeof EventsRoute
@@ -131,6 +160,9 @@ export interface FileRoutesByTo {
   '/reading-plan': typeof ReadingPlanRoute
   '/sermons': typeof SermonsRoute
   '/the-word': typeof TheWordRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin': typeof AdminIndexRoute
   '/api/media/upload': typeof ApiMediaUploadRoute
   '/api/public/google-callback': typeof ApiPublicGoogleCallbackRoute
   '/api/media/object/$': typeof ApiMediaObjectSplatRoute
@@ -140,6 +172,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/bible': typeof BibleRoute
   '/bookmarks': typeof BookmarksRoute
+  '/contact': typeof ContactRoute
   '/devotion': typeof DevotionRoute
   '/downloads': typeof DownloadsRoute
   '/events': typeof EventsRoute
@@ -149,6 +182,9 @@ export interface FileRoutesById {
   '/reading-plan': typeof ReadingPlanRoute
   '/sermons': typeof SermonsRoute
   '/the-word': typeof TheWordRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/': typeof AdminIndexRoute
   '/api/media/upload': typeof ApiMediaUploadRoute
   '/api/public/google-callback': typeof ApiPublicGoogleCallbackRoute
   '/api/media/object/$': typeof ApiMediaObjectSplatRoute
@@ -159,6 +195,7 @@ export interface FileRouteTypes {
     | '/'
     | '/bible'
     | '/bookmarks'
+    | '/contact'
     | '/devotion'
     | '/downloads'
     | '/events'
@@ -168,6 +205,9 @@ export interface FileRouteTypes {
     | '/reading-plan'
     | '/sermons'
     | '/the-word'
+    | '/admin/login'
+    | '/admin/settings'
+    | '/admin/'
     | '/api/media/upload'
     | '/api/public/google-callback'
     | '/api/media/object/$'
@@ -176,6 +216,7 @@ export interface FileRouteTypes {
     | '/'
     | '/bible'
     | '/bookmarks'
+    | '/contact'
     | '/devotion'
     | '/downloads'
     | '/events'
@@ -185,6 +226,9 @@ export interface FileRouteTypes {
     | '/reading-plan'
     | '/sermons'
     | '/the-word'
+    | '/admin/login'
+    | '/admin/settings'
+    | '/admin'
     | '/api/media/upload'
     | '/api/public/google-callback'
     | '/api/media/object/$'
@@ -193,6 +237,7 @@ export interface FileRouteTypes {
     | '/'
     | '/bible'
     | '/bookmarks'
+    | '/contact'
     | '/devotion'
     | '/downloads'
     | '/events'
@@ -202,6 +247,9 @@ export interface FileRouteTypes {
     | '/reading-plan'
     | '/sermons'
     | '/the-word'
+    | '/admin/login'
+    | '/admin/settings'
+    | '/admin/'
     | '/api/media/upload'
     | '/api/public/google-callback'
     | '/api/media/object/$'
@@ -211,6 +259,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BibleRoute: typeof BibleRoute
   BookmarksRoute: typeof BookmarksRoute
+  ContactRoute: typeof ContactRoute
   DevotionRoute: typeof DevotionRoute
   DownloadsRoute: typeof DownloadsRoute
   EventsRoute: typeof EventsRoute
@@ -220,6 +269,9 @@ export interface RootRouteChildren {
   ReadingPlanRoute: typeof ReadingPlanRoute
   SermonsRoute: typeof SermonsRoute
   TheWordRoute: typeof TheWordRoute
+  AdminLoginRoute: typeof AdminLoginRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminIndexRoute: typeof AdminIndexRoute
   ApiMediaUploadRoute: typeof ApiMediaUploadRoute
   ApiPublicGoogleCallbackRoute: typeof ApiPublicGoogleCallbackRoute
   ApiMediaObjectSplatRoute: typeof ApiMediaObjectSplatRoute
@@ -246,6 +298,13 @@ declare module '@tanstack/react-router' {
       path: '/bookmarks'
       fullPath: '/bookmarks'
       preLoaderRoute: typeof BookmarksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/devotion': {
@@ -311,6 +370,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TheWordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/admin/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/admin/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/media/upload': {
       id: '/api/media/upload'
       path: '/api/media/upload'
@@ -339,6 +419,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BibleRoute: BibleRoute,
   BookmarksRoute: BookmarksRoute,
+  ContactRoute: ContactRoute,
   DevotionRoute: DevotionRoute,
   DownloadsRoute: DownloadsRoute,
   EventsRoute: EventsRoute,
@@ -348,6 +429,9 @@ const rootRouteChildren: RootRouteChildren = {
   ReadingPlanRoute: ReadingPlanRoute,
   SermonsRoute: SermonsRoute,
   TheWordRoute: TheWordRoute,
+  AdminLoginRoute: AdminLoginRoute,
+  AdminSettingsRoute: AdminSettingsRoute,
+  AdminIndexRoute: AdminIndexRoute,
   ApiMediaUploadRoute: ApiMediaUploadRoute,
   ApiPublicGoogleCallbackRoute: ApiPublicGoogleCallbackRoute,
   ApiMediaObjectSplatRoute: ApiMediaObjectSplatRoute,
