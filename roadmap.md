@@ -1,15 +1,17 @@
 # Ministry website
 - [x] Build white/deep-red public pages, cinematic welcome and mission, real giving details.
-- [x] Provide KJV/NIV reading and downloads, verified with a 5.3 MB NIV download.
-- [x] Add phone-install metadata and controlled offline app-shell support; published offline verification awaits publishing.
-- [x] Cloudflare D1 database created as bmi-ministry (per prior confirmed setup).
-- [ ] Public Google-only accounts and password-based admin login — waiting for Google credentials and securely set admin passwords. Email/OTP membership superseded.
-- [ ] Update static header, medium-red header/footer, remove page introductions, and use footer social/copy icons.
-- [ ] Remove Community and Notepad; rename Books to Library and Announcements to Events; add Bookmarks and Sermons addresses.
-- [ ] Build ten-table D1 CMS and R2 basileia-media uploads — requires schema/bucket setup confirmation and verified R2 permissions.
-- [ ] Build admin module tabs, editable site settings, permissions and super-admin management.
-- [ ] Build Google-owned bookmarks for sermons, PDFs and Bible text; prayer moderation and live YouTube configuration.
-- [ ] Add video hero with uploaded-media fallback, overlapping weekly-message block and Events/Prayer/Library links.
-- [ ] Seed supplied branch program outlines, preacher default and editable site copy; no invented ministry resources.
-- [ ] Add provided Instagram and YouTube links to footer and Contact.
-- [ ] Real ministry video, sermons, devotions, reading plans, books and broadcast — awaiting supplied resources.
+- [x] Provide KJV/NIV reading and downloads.
+- [x] Add phone-install metadata and offline app-shell support.
+- [x] Cloudflare D1 database bmi-ministry and R2 bucket basileia-media in use.
+- [x] Static medium-red header/footer, page introductions removed, footer social/copy icons.
+- [x] Remove Community and Notepad; Books → Library, Announcements → Events; Bookmarks and Sermons pages.
+- [x] D1 CMS tables and R2 uploads (verified image upload).
+- [x] Admin module tabs, editable site settings, permissions and super-admin management (verified add/delete event).
+- [x] Prayer submissions and moderation (verified); live YouTube configuration.
+- [x] Video hero with fallback, overlapping weekly-message block, Events/Prayer/Library links.
+- [x] Branch program outlines, preacher default, editable copy seeded.
+- [x] Instagram and YouTube links in footer and Contact.
+- [x] Admin sign-in for olofinoflife@gmail.com.
+- [ ] Public "Continue with Google" — waiting for Google Client ID and Client Secret.
+- [ ] Password for basileiaministriesfinances@gmail.com — set from Settings → Admins Management.
+- [ ] Real ministry video, sermons, devotions, reading plans, books — added by admins in Studio.
