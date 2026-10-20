@@ -139,4 +139,4 @@ export function MinistryShell({ children }: { children: ReactNode }) {
 }
 
 export function PageTitle(_props: { title: string; description: string; kicker?: string }) { return null; }
-export function MemberNotice({ intro }: { intro?: string }) { return <div className="member-notice"><MemberAuth intro={intro} /></div>; }
+export function MemberNotice({ intro }: { intro?: string | undefined }) { return <div className="member-notice"><MemberAuth intro={intro} /></div>; }

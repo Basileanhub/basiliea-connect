@@ -8,7 +8,7 @@ import { memberSignIn, memberSignUp, memberVerify, memberResendCode } from '@/li
 type Mode = 'signin' | 'signup' | 'code';
 
 /** Member sign-in and sign-up with email + password, confirmed by a 6-digit code sent by email. */
-export function MemberAuth({ onDone, intro }: { onDone?: () => void; intro?: string }) {
+export function MemberAuth({ onDone, intro }: { onDone?: (() => void) | undefined; intro?: string | undefined }) {
   const [mode, setMode] = useState<Mode>('signin');
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState('');
