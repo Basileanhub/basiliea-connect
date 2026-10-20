@@ -16,7 +16,7 @@ export const memberSignUp=createServerFn({method:'POST'}).inputValidator(z.objec
  const {query}=await import('./cloudflare.server');const {issueCode}=await import('./member-email.server');const {hash}=await import('bcryptjs');
  const existing=(await query('SELECT id,email_verified FROM users WHERE email=?',[data.email]))[0];
  if(existing&&Number(existing['email_verified'])===1)return {ok:false,needsCode:false,error:'An account with this email already exists. Please sign in instead.'};
- const passwordHash=await hash(data.password,10);let id=existing?String(existing['id']):crypto.randomUUID();
+ const passwordHash=await hash(data.password,10);const id=existing?String(existing['id']):crypto.randomUUID();
  if(existing)await query('UPDATE users SET name=?,password_hash=? WHERE id=?',[data.name,passwordHash,id]);
  else await query('INSERT INTO users(id,google_sub,email,name,password_hash,email_verified) VALUES (?,?,?,?,?,0)',[id,`email:${data.email}`,data.email,data.name,passwordHash]);
  try{await issueCode(id,data.email,data.name);}catch(e){return {ok:false,needsCode:true,error:e instanceof Error?e.message:'We could not send your code.'};}
