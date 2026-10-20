@@ -10,6 +10,43 @@ export const adminLogin=createServerFn({method:'POST'}).inputValidator(z.object(
  await updateSession(sessionConfig(),{adminId:Number(row['id']),userId:undefined});return {ok:true,error:''};
 });
 export const signOut=createServerFn({method:'POST'}).handler(async()=>{const {sessionConfig}=await import('./cloudflare.server');const {clearSession}=await import('@tanstack/react-start/server');await clearSession(sessionConfig());return {ok:true};});
+type MemberResult={ok:boolean;needsCode:boolean;error:string};
+const memberEmail=z.string().trim().toLowerCase().pipe(z.string().email().max(200));
+export const memberSignUp=createServerFn({method:'POST'}).inputValidator(z.object({name:z.string().trim().min(1).max(80),email:memberEmail,password:z.string().min(8).max(128)})).handler(async({data}):Promise<MemberResult>=>{
+ const {query}=await import('./cloudflare.server');const {issueCode}=await import('./member-email.server');const {hash}=await import('bcryptjs');
+ const existing=(await query('SELECT id,email_verified FROM users WHERE email=?',[data.email]))[0];
+ if(existing&&Number(existing['email_verified'])===1)return {ok:false,needsCode:false,error:'An account with this email already exists. Please sign in instead.'};
+ const passwordHash=await hash(data.password,10);let id=existing?String(existing['id']):crypto.randomUUID();
+ if(existing)await query('UPDATE users SET name=?,password_hash=? WHERE id=?',[data.name,passwordHash,id]);
+ else await query('INSERT INTO users(id,google_sub,email,name,password_hash,email_verified) VALUES (?,?,?,?,?,0)',[id,`email:${data.email}`,data.email,data.name,passwordHash]);
+ try{await issueCode(id,data.email,data.name);}catch(e){return {ok:false,needsCode:true,error:e instanceof Error?e.message:'We could not send your code.'};}
+ return {ok:true,needsCode:true,error:''};
+});
+export const memberSignIn=createServerFn({method:'POST'}).inputValidator(z.object({email:memberEmail,password:z.string().min(1).max(128)})).handler(async({data}):Promise<MemberResult>=>{
+ const {query,sessionConfig}=await import('./cloudflare.server');const {compare}=await import('bcryptjs');const {updateSession,setResponseHeader}=await import('@tanstack/react-start/server');setResponseHeader('Cache-Control','no-store');
+ const row=(await query('SELECT id,name,email,password_hash,email_verified FROM users WHERE email=?',[data.email]))[0];
+ const stored=typeof row?.['password_hash']==='string'?row['password_hash']:'';
+ if(!row||!stored||!await compare(data.password,stored))return {ok:false,needsCode:false,error:'Email or password is incorrect.'};
+ if(Number(row['email_verified'])!==1){const {issueCode}=await import('./member-email.server');try{await issueCode(String(row['id']),data.email,String(row['name']));}catch(e){return {ok:false,needsCode:true,error:e instanceof Error?e.message:'We could not send your code.'};}return {ok:false,needsCode:true,error:''};}
+ await updateSession(sessionConfig(),{userId:String(row['id']),adminId:undefined});return {ok:true,needsCode:false,error:''};
+});
+export const memberVerify=createServerFn({method:'POST'}).inputValidator(z.object({email:memberEmail,code:z.string().trim().regex(/^\d{6}$/)})).handler(async({data}):Promise<MemberResult>=>{
+ const {query,sessionConfig}=await import('./cloudflare.server');const {codeHash,sameHash}=await import('./member-email.server');const {updateSession,setResponseHeader}=await import('@tanstack/react-start/server');setResponseHeader('Cache-Control','no-store');
+ const row=(await query('SELECT id,verify_code_hash,verify_expires,verify_attempts FROM users WHERE email=?',[data.email]))[0];
+ const stored=typeof row?.['verify_code_hash']==='string'?row['verify_code_hash']:'';
+ if(!row||!stored)return {ok:false,needsCode:true,error:'Please request a new code.'};
+ if(Number(row['verify_attempts'])>=5)return {ok:false,needsCode:true,error:'Too many tries. Please request a new code.'};
+ if(Number(row['verify_expires'])<Date.now())return {ok:false,needsCode:true,error:'This code has expired. Please request a new code.'};
+ if(!sameHash(await codeHash(data.email,data.code),stored)){await query('UPDATE users SET verify_attempts=verify_attempts+1 WHERE id=?',[row['id']]);return {ok:false,needsCode:true,error:'That code is not correct.'};}
+ await query('UPDATE users SET email_verified=1,verify_code_hash=NULL,verify_expires=NULL,verify_attempts=0 WHERE id=?',[row['id']]);
+ await updateSession(sessionConfig(),{userId:String(row['id']),adminId:undefined});return {ok:true,needsCode:false,error:''};
+});
+export const memberResendCode=createServerFn({method:'POST'}).inputValidator(z.object({email:memberEmail})).handler(async({data}):Promise<MemberResult>=>{
+ const {query}=await import('./cloudflare.server');const {issueCode}=await import('./member-email.server');
+ const row=(await query('SELECT id,name,email_verified FROM users WHERE email=?',[data.email]))[0];
+ if(row&&Number(row['email_verified'])!==1){try{await issueCode(String(row['id']),data.email,String(row['name']));}catch(e){return {ok:false,needsCode:true,error:e instanceof Error?e.message:'We could not send your code.'};}}
+ return {ok:true,needsCode:true,error:''};
+});
 export const startGoogle=createServerFn({method:'POST'}).handler(async()=>{
  const {setCookie,getRequestUrl}=await import('@tanstack/react-start/server');const client=process.env['GOOGLE_CLIENT_ID'];if(!client||!process.env['GOOGLE_CLIENT_SECRET'])return {url:'',error:'Google sign-in is awaiting ministry setup.'};
  const state=crypto.randomUUID();setCookie('bmi-oauth-state',state,{httpOnly:true,sameSite:'lax',secure:process.env['NODE_ENV']==='production',maxAge:600,path:'/'});
