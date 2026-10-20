@@ -8,10 +8,11 @@
 - [x] Admin module tabs, editable site settings, permissions and super-admin management.
 - [x] Prayer submissions and moderation; live YouTube configuration.
 - [x] Admin sign-in for olofinoflife@gmail.com.
+- [x] Admin passwords: basileiaministriesfinances@gmail.com and new admin ajohnabayomi@gmail.com.
 
-## Current request (Oct 19)
-- [ ] Admin passwords: basileiaministriesfinances@gmail.com and new admin ajohnabayomi@gmail.com.
-- [ ] Header and footer back to white; footer always last on every page.
+## Current request (Oct 19–20)
+- [ ] Header and footer in the logo's brown/deep red; footer always last on every page.
+- [ ] Works well on every device size (phone, tablet, laptop, large screen).
 - [ ] Events page: calendar of both branch programs (editable dates) + special events from Studio.
 - [ ] Contact → Partnership page (giving categories, narration note, account number with copy); remove account from footer.
 - [ ] Bible page: verse-by-verse reading, top navigation with version switcher, colour highlights = bookmarks; remove Bookmarks page.
@@ -23,5 +24,6 @@
 - [ ] Mission text moves to the footer.
 
 ## Waiting on others
+- [ ] Verify wearebmi.org in Resend (DNS records) so sign-up codes reach every member.
 - [ ] Public "Continue with Google" — waiting for Google Client ID and Client Secret.
 - [ ] Real ministry sermons, devotions, reading plans, books — added by admins in Studio.
