@@ -1,10 +1,107 @@
-import { createFileRoute,Link } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { useSuspenseQuery } from '@tanstack/react-query';
-import { useRef,useState } from 'react';
-import { ArrowRight,Play,Pause,CalendarDays,HeartHandshake,BookOpen } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { ArrowRight, Pause, Play, CalendarDays, MapPin, NotebookPen, BookOpenCheck, HeartHandshake, Headphones } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { pageMeta } from '@/lib/page-meta';
 import { contentOptions } from '@/lib/content-query';
+import { formatDate, upcomingEvents, type Occurrence } from '@/lib/events-calendar';
+import type { Row } from '@/lib/cms-model';
 import worship from '@/assets/worship.jpg';
-export const Route=createFileRoute('/')({head:()=>pageMeta('Welcome home','Welcome to Basileia Ministries International. The gospel of the Kingdom from the church to the world.'),loader:({context})=>context.queryClient.ensureQueryData(contentOptions),component:Home});
-function Home(){const {data}=useSuspenseQuery(contentOptions);const s=data.settings;const video=useRef<HTMLVideoElement>(null);const [paused,setPaused]=useState(false);const cover=data.devotions.find(d=>d['cover_image_url'])?.['cover_image_url']??data.sermons.find(d=>d['cover_image_url'])?.['cover_image_url'];return <main><section className="hero">{s['hero_video']?<video ref={video} className="hero-image" src={s['hero_video']} poster={worship} autoPlay muted loop playsInline/>:<img src={worship} width={1920} height={1024} alt="A congregation gathered together in worship" className={`hero-image ${paused?'animation-paused':''}`}/>}<div className="container-main hero-content"><div className="eyebrow">{s['hero_tagline']}</div><h1>{s['hero_title']}</h1><p className="hero-description">{s['hero_description']}</p></div><div className="hero-controls"><Button variant="hero" size="icon" aria-label={paused?'Play welcome':'Pause welcome'} onClick={()=>{if(video.current){if(paused)void video.current.play();else video.current.pause();}setPaused(!paused);}}>{paused?<Play/>:<Pause/>}</Button></div></section><section className="weekly-section container-main"><div className="weekly-block"><div className="weekly-label">{s['weekly_label']}</div><h2>{s['weekly_title']}</h2><p>{s['weekly_description']} <Link to="/sermons">Watch Message <ArrowRight size={16}/></Link></p>{cover&&<div className="weekly-cover"><img src={String(cover)} alt="Latest ministry message"/></div>}<div className="weekly-links"><Link to="/events"><CalendarDays size={18}/>Events<ArrowRight size={16}/></Link><Link to="/prayer"><HeartHandshake size={18}/>Prayer Wall<ArrowRight size={16}/></Link><Link to="/library"><BookOpen size={18}/>Library<ArrowRight size={16}/></Link></div></div></section><section className="mission-section"><div className="container-main"><h2>{s['mission_title']}</h2><p className="text-muted-foreground leading-8 max-w-3xl mx-auto">{s['mission_body']}</p></div></section></main>;}
+import welcome from '@/assets/bmi-welcome.mp4.asset.json';
+
+export const Route = createFileRoute('/')({
+  head: () => pageMeta('Welcome home', 'Welcome to Basileia Ministries International. The gospel of the Kingdom from the church to the world.'),
+  loader: ({ context }) => context.queryClient.ensureQueryData(contentOptions),
+  component: Home,
+});
+
+function Home() {
+  const { data } = useSuspenseQuery(contentOptions);
+  const s = data.settings;
+  const video = useRef<HTMLVideoElement>(null);
+  const [paused, setPaused] = useState(false);
+  const videoSrc = s['hero_video'] || welcome.url;
+  useEffect(() => { const v = video.current; if (v) { v.muted = true; void v.play().catch(() => setPaused(true)); } }, [videoSrc]);
+
+  const blocks = [
+    { key: 'devotion', to: '/devotion', icon: NotebookPen, latest: data.devotions[0]?.['title'] },
+    { key: 'plan', to: '/reading-plan', icon: BookOpenCheck, latest: data.reading_plans[0]?.['title'] },
+    { key: 'prayer', to: '/prayer', icon: HeartHandshake, latest: null },
+    { key: 'word', to: '/sermons', icon: Headphones, latest: data.sermons[0]?.['title'] },
+  ] as const;
+
+  return (
+    <main>
+      <section className="hero">
+        <video ref={video} className="hero-image" src={videoSrc} poster={worship} autoPlay muted loop playsInline preload="metadata" aria-hidden="true" />
+        <div className="container-main hero-content">
+          <div className="eyebrow">{s['hero_tagline']}</div>
+          <h1>{s['hero_title']}</h1>
+          {s['hero_description'] && <p className="hero-description">{s['hero_description']}</p>}
+        </div>
+        <div className="hero-controls">
+          <Button variant="hero" size="icon" aria-label={paused ? 'Play welcome video' : 'Pause welcome video'} onClick={() => { const v = video.current; if (!v) return; if (paused) void v.play(); else v.pause(); setPaused(!paused); }}>
+            {paused ? <Play /> : <Pause />}
+          </Button>
+        </div>
+      </section>
+
+      <section className="weekly-section container-main">
+        <EventsSlider events={data.events} label={s['events_label'] ?? ''} cta={s['events_cta'] || 'View all events'} />
+      </section>
+
+      <section className="verse-blocks container-main" aria-label="Ministry resources">
+        {blocks.map(b => (
+          <article key={b.key} className="verse-block">
+            <div className="weekly-label"><b.icon size={18} />{s[`${b.key}_label`]}</div>
+            {s[`${b.key}_verse_text`] && <blockquote>“{s[`${b.key}_verse_text`]}”</blockquote>}
+            {s[`${b.key}_verse_ref`] && <cite>{s[`${b.key}_verse_ref`]}</cite>}
+            {b.latest && <p className="verse-latest">Latest: {String(b.latest)}</p>}
+            <Link to={b.to} className="verse-cta">{s[`${b.key}_cta`] || 'Open'} <ArrowRight size={16} /></Link>
+          </article>
+        ))}
+      </section>
+    </main>
+  );
+}
+
+function EventsSlider({ events, label, cta }: { events: Row[]; label: string; cta: string }) {
+  const [today, setToday] = useState<Date | null>(null);
+  const [index, setIndex] = useState(0);
+  const [hold, setHold] = useState(false);
+  useEffect(() => setToday(new Date()), []);
+  const slides: Occurrence[] = useMemo(() => (today ? upcomingEvents(events, today) : []), [events, today]);
+  useEffect(() => {
+    if (slides.length < 2 || hold) return;
+    const timer = setInterval(() => setIndex(i => (i + 1) % slides.length), 5000);
+    return () => clearInterval(timer);
+  }, [slides.length, hold]);
+  const slide = slides[index % Math.max(slides.length, 1)];
+  const image = slide ? events.find(e => String(e['id']) === slide.id)?.['image_url'] : null;
+
+  return (
+    <div className="weekly-block events-slider" onMouseEnter={() => setHold(true)} onMouseLeave={() => setHold(false)} onFocus={() => setHold(true)} onBlur={() => setHold(false)}>
+      <div className="weekly-label"><CalendarDays size={18} />{label}</div>
+      <div className="slide-window" aria-live="polite">
+        {slide ? (
+          <div key={`${slide.id}-${slide.date}`} className="event-slide">
+            <p className="slide-date">{formatDate(slide.date)}</p>
+            <h2>{slide.title}</h2>
+            <p className="slide-meta">{[slide.branch, slide.location].filter(Boolean).map(t => <span key={t}><MapPin size={14} />{t}</span>)}</p>
+            {slide.description && <p className="slide-description">{slide.description}</p>}
+            {image && <div className="weekly-cover"><img src={String(image)} alt={slide.title} /></div>}
+          </div>
+        ) : <div className="event-slide"><h2>&nbsp;</h2></div>}
+      </div>
+      <div className="slider-foot">
+        {slides.length > 1 && (
+          <div className="slider-dots" role="tablist" aria-label="Choose event">
+            {slides.map((o, i) => <button key={o.id} type="button" role="tab" aria-selected={i === index % slides.length} aria-label={`Show ${o.title}${o.branch ? `, ${o.branch}` : ''}`} onClick={() => setIndex(i)} />)}
+          </div>
+        )}
+        <Link to="/events" className="slider-cta">{cta} <ArrowRight size={16} /></Link>
+      </div>
+    </div>
+  );
+}
