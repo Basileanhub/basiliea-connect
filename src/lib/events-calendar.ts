@@ -90,3 +90,14 @@ export function formatDate(date: string, opts: Intl.DateTimeFormatOptions = { we
   const [y, m, d] = date.split('-').map(Number);
   return new Date(Date.UTC(y ?? 1970, (m ?? 1) - 1, d ?? 1)).toLocaleDateString('en-GB', { ...opts, timeZone: 'UTC' });
 }
+
+/** Human wording for a repeating rule, e.g. "Last Saturday of every month". */
+export function ruleLabel(rule: string | null | undefined) {
+  return recurrenceOptions.find(o => o.value && o.value === rule)?.label ?? '';
+}
+
+/** Calendar cells for a month: leading blanks (null) so day 1 sits under its weekday (weeks start Sunday). */
+export function monthCells(year: number, month: number): (number | null)[] {
+  const lead = weekday(year, month, 1);
+  return [...Array.from({ length: lead }, () => null), ...Array.from({ length: daysIn(year, month) }, (_, i) => i + 1)];
+}

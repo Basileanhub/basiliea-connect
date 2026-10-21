@@ -18,6 +18,7 @@ import { Route as DownloadsRouteImport } from './routes/downloads'
 import { Route as EventsRouteImport } from './routes/events'
 import { Route as LibraryRouteImport } from './routes/library'
 import { Route as LiveRouteImport } from './routes/live'
+import { Route as PartnershipRouteImport } from './routes/partnership'
 import { Route as PrayerRouteImport } from './routes/prayer'
 import { Route as ReadingPlanRouteImport } from './routes/reading-plan'
 import { Route as SermonsRouteImport } from './routes/sermons'
@@ -72,6 +73,11 @@ const LibraryRoute = LibraryRouteImport.update({
 const LiveRoute = LiveRouteImport.update({
   id: '/live',
   path: '/live',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PartnershipRoute = PartnershipRouteImport.update({
+  id: '/partnership',
+  path: '/partnership',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrayerRoute = PrayerRouteImport.update({
@@ -135,6 +141,7 @@ export interface FileRoutesByFullPath {
   '/events': typeof EventsRoute
   '/library': typeof LibraryRoute
   '/live': typeof LiveRoute
+  '/partnership': typeof PartnershipRoute
   '/prayer': typeof PrayerRoute
   '/reading-plan': typeof ReadingPlanRoute
   '/sermons': typeof SermonsRoute
@@ -156,6 +163,7 @@ export interface FileRoutesByTo {
   '/events': typeof EventsRoute
   '/library': typeof LibraryRoute
   '/live': typeof LiveRoute
+  '/partnership': typeof PartnershipRoute
   '/prayer': typeof PrayerRoute
   '/reading-plan': typeof ReadingPlanRoute
   '/sermons': typeof SermonsRoute
@@ -178,6 +186,7 @@ export interface FileRoutesById {
   '/events': typeof EventsRoute
   '/library': typeof LibraryRoute
   '/live': typeof LiveRoute
+  '/partnership': typeof PartnershipRoute
   '/prayer': typeof PrayerRoute
   '/reading-plan': typeof ReadingPlanRoute
   '/sermons': typeof SermonsRoute
@@ -201,6 +210,7 @@ export interface FileRouteTypes {
     | '/events'
     | '/library'
     | '/live'
+    | '/partnership'
     | '/prayer'
     | '/reading-plan'
     | '/sermons'
@@ -222,6 +232,7 @@ export interface FileRouteTypes {
     | '/events'
     | '/library'
     | '/live'
+    | '/partnership'
     | '/prayer'
     | '/reading-plan'
     | '/sermons'
@@ -243,6 +254,7 @@ export interface FileRouteTypes {
     | '/events'
     | '/library'
     | '/live'
+    | '/partnership'
     | '/prayer'
     | '/reading-plan'
     | '/sermons'
@@ -265,6 +277,7 @@ export interface RootRouteChildren {
   EventsRoute: typeof EventsRoute
   LibraryRoute: typeof LibraryRoute
   LiveRoute: typeof LiveRoute
+  PartnershipRoute: typeof PartnershipRoute
   PrayerRoute: typeof PrayerRoute
   ReadingPlanRoute: typeof ReadingPlanRoute
   SermonsRoute: typeof SermonsRoute
@@ -340,6 +353,13 @@ declare module '@tanstack/react-router' {
       path: '/live'
       fullPath: '/live'
       preLoaderRoute: typeof LiveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/partnership': {
+      id: '/partnership'
+      path: '/partnership'
+      fullPath: '/partnership'
+      preLoaderRoute: typeof PartnershipRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/prayer': {
@@ -425,6 +445,7 @@ const rootRouteChildren: RootRouteChildren = {
   EventsRoute: EventsRoute,
   LibraryRoute: LibraryRoute,
   LiveRoute: LiveRoute,
+  PartnershipRoute: PartnershipRoute,
   PrayerRoute: PrayerRoute,
   ReadingPlanRoute: ReadingPlanRoute,
   SermonsRoute: SermonsRoute,

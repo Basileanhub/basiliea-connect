@@ -1,24 +1,254 @@
-import { useState } from 'react';
-import { useQuery,useQueryClient } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useServerFn } from '@tanstack/react-start';
 import { Link } from '@tanstack/react-router';
-import { Pencil,Trash2,Plus,Settings,Save } from 'lucide-react';
-import { modules,isModule,allowed,defaultPreacher,type Row } from '@/lib/cms-model';
-import { adminRows,saveContent,deleteContent,saveSettings } from '@/lib/cms.functions';
-import { saveAdmin,removeAdmin } from '@/lib/auth.functions';
+import { Pencil, Trash2, Plus, Settings, Save, BookText } from 'lucide-react';
+import { modules, isModule, allowed, defaultPreacher, type Row, type Module } from '@/lib/cms-model';
+import { adminRows, saveContent, deleteContent, saveSettings } from '@/lib/cms.functions';
+import { saveAdmin, removeAdmin } from '@/lib/auth.functions';
 import { identityOptions } from '@/lib/content-query';
+import { recurrenceOptions } from '@/lib/events-calendar';
+import { parseBibleText, type BibleData } from '@/lib/bible-text';
 import { Button } from './ui/button';
-import { Dialog,DialogContent,DialogTitle } from './ui/dialog';
-import { GoogleSignIn } from './GoogleSignIn';
-import { MediaUpload } from './MediaUpload';
-export function AdminPanel({settings=false}:{settings?:boolean}){const {data:user,isPending}=useQuery(identityOptions);const [module,setModule]=useState(settings?'settings':'devotions');const [editing,setEditing]=useState<Row|null>(null);const [status,setStatus]=useState('');const qc=useQueryClient();const read=useServerFn(adminRows);const save=useServerFn(saveContent);const remove=useServerFn(deleteContent);const settingsSave=useServerFn(saveSettings);const adminSave=useServerFn(saveAdmin);const adminRemove=useServerFn(removeAdmin);
- const {data:rows=[],error}=useQuery({queryKey:['admin-rows',module],queryFn:()=>read({data:{module}}),enabled:user?.kind==='admin'&&allowed(user.role,user.permissions,module),retry:false});
- async function refresh(){await qc.invalidateQueries({queryKey:['admin-rows']});await qc.invalidateQueries({queryKey:['ministry-content']});}
- if(isPending)return <main className="container-main section">Loading…</main>;
- if(user?.kind!=='admin')return <main className="container-main section"><h1>Administrator access</h1><Button asChild><Link to="/admin/login">Sign in as administrator</Link></Button></main>;
- const choices=settings?[['settings','Website & Hero'],...(user.role==='super_admin'?[['admins','Admins Management']]:[])]:[...Object.entries(modules).map(([key,v])=>[key,v.label]),['bookmarks','Bookmarks']];
- return <main className="container-main section"><div className="admin-heading"><div><h1>{settings?'Settings':'Ministry Studio'}</h1><p className="status">{user.name} · {user.role==='super_admin'?'Super administrator':'Editor'}</p></div><Button asChild variant="outline"><Link to={settings?'/admin':'/admin/settings'}><Settings/>{settings?'Studio':'Settings'}</Link></Button></div><div className="admin-tabs">{choices.filter(([key])=>key&&allowed(user.role,user.permissions,key)).map(([key,label])=>key&&<Button key={key} variant={module===key?'default':'outline'} onClick={()=>{setModule(key);setStatus('');}}>{label}</Button>)}</div>{error&&<p role="alert">{error.message}</p>}{status&&<p role="status">{status}</p>}{module==='settings'?<form key={rows.map(r=>r['value']).join('|')} className="cms-form settings-form" onSubmit={async e=>{e.preventDefault();const data=Object.fromEntries(new FormData(e.currentTarget).entries());try{await settingsSave({data:Object.fromEntries(Object.entries(data).map(([k,v])=>[k,String(v)]))});setStatus('Settings saved.');await refresh();}catch(e){setStatus(e instanceof Error?e.message:'Save failed.');}}}>{rows.map(row=><label key={String(row['key'])}>{String(row['key']).replaceAll('_',' ')}<textarea name={String(row['key'])} defaultValue={String(row['value']??'')} rows={String(row['value']).length>120?3:1}/></label>)}<MediaUpload module="settings" accept="video/mp4,video/webm" label="Upload hero video" onUploaded={url=>{const input=document.querySelector<HTMLTextAreaElement>('textarea[name=hero_video]');if(input)input.value=url;}}/><Button type="submit"><Save/>Save settings</Button></form>:<><div className="admin-heading"><h2>{module==='admins'?'Administrators':module==='bookmarks'?'Bookmarks':isModule(module)?modules[module].label:''}</h2>{module!=='bookmarks'&&<Button onClick={()=>setEditing({})}><Plus/>Add</Button>}</div><div className="admin-list">{rows.length?rows.map(row=><article key={String(row['id'])}><div><strong>{row['title']??row['name']??row['type']??row['id']}</strong><p className="status">{row['email']??row['description']??row['request']??row['highlighted_text']}</p></div>{module!=='bookmarks'&&<div className="flex gap-2"><Button variant="outline" size="icon" title="Edit" aria-label="Edit item" onClick={()=>setEditing(row)}><Pencil size={16}/></Button><Button variant="outline" size="icon" title="Delete" aria-label="Delete item" onClick={async()=>{if(!window.confirm(`Delete ${row['title']??row['name']??'this item'}? This cannot be undone.`))return;try{if(module==='admins')await adminRemove({data:{id:Number(row['id'])}});else await remove({data:{module,id:Number(row['id'])}});await refresh();}catch(e){setStatus(e instanceof Error?e.message:'Delete failed.');}}}><Trash2 size={16}/></Button></div>}</article>):<p className="status">No records yet.</p>}</div></>}
- <Dialog open={editing!==null} onOpenChange={open=>{if(!open)setEditing(null);}}><DialogContent className="cms-dialog"><DialogTitle>{editing?.['id']?'Edit':'Add'} {module==='admins'?'administrator':isModule(module)?modules[module].label:'item'}</DialogTitle>{editing&&<form className="cms-form" onSubmit={async e=>{e.preventDefault();const data=new FormData(e.currentTarget);try{if(module==='admins'){await adminSave({data:{id:editing['id']?Number(editing['id']):undefined,name:String(data.get('name')),email:String(data.get('email')),password:data.get('password')?String(data.get('password')):undefined,role:data.get('role')==='super_admin'?'super_admin':'editor',permissions:data.getAll('permissions').map(String),active:data.get('active')==='on'}});}else{const values=Object.fromEntries([...data.entries()].map(([key,value])=>[key,/^(is_|day_number|sort_order)/.test(key)?Number(value):String(value)]));await save({data:{module,id:editing['id']?Number(editing['id']):undefined,values}});}setEditing(null);await refresh();setStatus('Saved.');}catch(e){setStatus(e instanceof Error?e.message:'Save failed.');}}}>
- {module==='admins'?<><label>Name<input name="name" required defaultValue={String(editing['name']??'')}/></label><label>Email<input name="email" type="email" required defaultValue={String(editing['email']??'')}/></label><label>New password<input name="password" type="password" minLength={12} required={!editing['id']} autoComplete="new-password"/></label><label>Role<select name="role" defaultValue={String(editing['role']??'editor')}><option value="editor">Editor</option><option value="super_admin">Super administrator</option></select></label><label className="check-label"><input type="checkbox" name="active" defaultChecked={editing['active']!==0}/>Active</label><fieldset><legend>Module permissions</legend>{[...Object.keys(modules),'settings','bookmarks'].map(key=><label key={key} className="check-label"><input type="checkbox" name="permissions" value={key} defaultChecked={String(editing['permissions']??'').includes(`"${key}"`)}/>{key.replaceAll('_',' ')}</label>)}</fieldset></>:isModule(module)?<>{modules[module].fields.map(field=><label key={field}>{field.replaceAll('_',' ')}{field.startsWith('is_')?<select name={field} defaultValue={String(editing[field]??1)}><option value="1">Yes</option><option value="0">No</option></select>:<textarea name={field} required={field==='title'||field==='request'||(module==='library'&&field==='file_url')} rows={field==='content'||field==='description'?5:1} defaultValue={String(editing[field]??(field==='preacher'?defaultPreacher:''))}/> }</label>)}<MediaUpload module={module} accept={module==='sermons'?'audio/*,image/*':module==='library'||module==='bibles'?'application/pdf':'image/*'} onUploaded={url=>{const field=module==='sermons'?(arguments[1] as File|undefined)?.type.startsWith('image/')?'cover_image_url':'audio_url':module==='library'?'file_url':module==='bibles'?'pdf_url':'cover_image_url';setEditing({...editing,[field]:url});const input=document.querySelector<HTMLTextAreaElement>(`textarea[name=${field}]`);if(input)input.value=url;}}/></>:null}
- <Button type="submit"><Save/>Save</Button>{status&&<p role="status">{status}</p>}</form>}</DialogContent></Dialog>
- </main>;}
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from './ui/dialog';
+import { MediaUpload, uploadMedia } from './MediaUpload';
+
+const labels: Record<string, string> = {
+  kind: 'Type', recurrence: 'Repeats', dates: 'Set dates (override the repeating rule)', text_url: 'Bible text file', pdf_url: 'Bible PDF (optional)',
+  code: 'Short code (e.g. KJV)', name: 'Name', start_date: 'Start date', end_date: 'End date', is_pinned: 'Pinned', image_url: 'Image',
+};
+const hints: Record<string, string> = {
+  dates: 'One date per line as YYYY-MM-DD. Dates entered for a month replace the repeating rule for that month only.',
+  text_url: 'Upload a .json Bible, or a .txt file with one verse per line, like "Genesis 1:1 In the beginning…".',
+};
+
+function field(form: HTMLFormElement | null | undefined, name: string) { return form?.querySelector<HTMLInputElement | HTMLTextAreaElement>(`[name="${name}"]`) ?? null; }
+
+function FieldInput({ module, name, row }: { module: Module; name: string; row: Row }) {
+  const value = String(row[name] ?? (name === 'preacher' ? defaultPreacher : ''));
+  if (name.startsWith('is_')) return <select name={name} defaultValue={String(row[name] ?? (name === 'is_pinned' || name === 'is_answered' ? 0 : 1))}><option value="1">Yes</option><option value="0">No</option></select>;
+  if (module === 'events' && name === 'kind') return <select name={name} defaultValue={value || 'special'}><option value="special">Special event (set start and end date)</option><option value="fixed">Branch program (repeats)</option></select>;
+  if (module === 'events' && name === 'recurrence') return <select name={name} defaultValue={value}>{recurrenceOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}</select>;
+  if (/^(date|start_date|end_date|published_at)$/.test(name)) return <input type="date" name={name} defaultValue={value.slice(0, 10)} />;
+  if (name === 'scheduled_at') return <input type="datetime-local" name={name} defaultValue={value.slice(0, 16)} />;
+  if (name === 'day_number' || name === 'sort_order') return <input type="number" name={name} defaultValue={value || '0'} />;
+  const long = name === 'content' || name === 'description' || name === 'request' || name === 'dates';
+  const required = name === 'title' || name === 'request' || (module === 'library' && name === 'file_url') || (module === 'bibles' && (name === 'code' || name === 'name' || name === 'text_url'));
+  return <textarea name={name} required={required} rows={long ? 5 : 1} defaultValue={value} />;
+}
+
+function uploadsFor(module: Module): { accept: string; label: string; target: (file: File) => string; prepare?: (file: File, form: HTMLFormElement | null) => Promise<File> }[] {
+  switch (module) {
+    case 'sermons': return [
+      { accept: 'audio/*', label: 'Upload message audio', target: () => 'audio_url' },
+      { accept: 'image/*', label: 'Upload cover image', target: () => 'cover_image_url' },
+    ];
+    case 'library': return [
+      { accept: 'application/pdf', label: 'Upload PDF book', target: () => 'file_url' },
+      { accept: 'image/*', label: 'Upload cover image', target: () => 'cover_image_url' },
+    ];
+    case 'bibles': return [
+      {
+        accept: '.json,.txt,application/json,text/plain', label: 'Upload Bible text', target: () => 'text_url',
+        prepare: async (file, form) => {
+          const code = (field(form, 'code')?.value ?? '').trim().toUpperCase();
+          const name = (field(form, 'name')?.value ?? '').trim();
+          if (!/^[A-Z0-9]{2,12}$/.test(code) || !name) throw new Error('Enter the short code and name first.');
+          const bible = parseBibleText(await file.text(), code, name);
+          return new File([JSON.stringify(bible)], `${code}.json`, { type: 'application/json' });
+        },
+      },
+      { accept: 'application/pdf', label: 'Upload Bible PDF', target: () => 'pdf_url' },
+    ];
+    case 'events': return [{ accept: 'image/*', label: 'Upload event image', target: () => 'image_url' }];
+    case 'devotions': return [{ accept: 'image/*', label: 'Upload cover image', target: () => 'cover_image_url' }];
+    default: return [];
+  }
+}
+
+export function AdminPanel({ settings = false }: { settings?: boolean }) {
+  const { data: user, isPending } = useQuery(identityOptions);
+  const [module, setModule] = useState(settings ? 'settings' : 'devotions');
+  const [editing, setEditing] = useState<Row | null>(null);
+  const [editingText, setEditingText] = useState<Row | null>(null);
+  const [status, setStatus] = useState('');
+  const qc = useQueryClient();
+  const read = useServerFn(adminRows);
+  const save = useServerFn(saveContent);
+  const remove = useServerFn(deleteContent);
+  const settingsSave = useServerFn(saveSettings);
+  const adminSave = useServerFn(saveAdmin);
+  const adminRemove = useServerFn(removeAdmin);
+  const { data: rows = [], error } = useQuery({ queryKey: ['admin-rows', module], queryFn: () => read({ data: { module } }), enabled: user?.kind === 'admin' && allowed(user.role, user.permissions, module), retry: false });
+  async function refresh() { await qc.invalidateQueries({ queryKey: ['admin-rows'] }); await qc.invalidateQueries({ queryKey: ['ministry-content'] }); }
+
+  if (isPending) return <main className="container-main section">Loading…</main>;
+  if (user?.kind !== 'admin') return <main className="container-main section"><h1>Administrator access</h1><Button asChild><Link to="/admin/login">Sign in as administrator</Link></Button></main>;
+
+  const choices: [string, string][] = settings
+    ? [['settings', 'Website & Hero'], ...(user.role === 'super_admin' ? [['admins', 'Admins Management'] as [string, string]] : [])]
+    : [...Object.entries(modules).map(([key, v]) => [key, v.label] as [string, string]), ['bookmarks', 'Bookmarks']];
+  const title = module === 'admins' ? 'Administrators' : module === 'bookmarks' ? 'Bookmarks' : isModule(module) ? modules[module].label : '';
+  const canAdd = module !== 'bookmarks' && module !== 'prayer_requests';
+
+  async function submitItem(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!editing) return;
+    const data = new FormData(e.currentTarget);
+    try {
+      if (module === 'admins') {
+        await adminSave({ data: { id: editing['id'] ? Number(editing['id']) : undefined, name: String(data.get('name')), email: String(data.get('email')), password: data.get('password') ? String(data.get('password')) : undefined, role: data.get('role') === 'super_admin' ? 'super_admin' : 'editor', permissions: data.getAll('permissions').map(String), active: data.get('active') === 'on' } });
+      } else {
+        const values = Object.fromEntries([...data.entries()].map(([key, value]) => [key, /^(is_|day_number|sort_order)/.test(key) ? Number(value) : key === 'code' ? String(value).trim().toUpperCase() : String(value)]));
+        await save({ data: { module, id: editing['id'] ? Number(editing['id']) : undefined, values } });
+      }
+      setEditing(null); await refresh(); setStatus('Saved.');
+    } catch (err) { setStatus(err instanceof Error ? err.message : 'Save failed.'); }
+  }
+
+  return (
+    <main className="container-main section">
+      <div className="admin-heading">
+        <div><h1>{settings ? 'Settings' : 'Ministry Studio'}</h1><p className="status">{user.name} · {user.role === 'super_admin' ? 'Super administrator' : 'Editor'}</p></div>
+        <Button asChild variant="outline"><Link to={settings ? '/admin' : '/admin/settings'}><Settings />{settings ? 'Studio' : 'Settings'}</Link></Button>
+      </div>
+      <div className="admin-tabs">
+        {choices.filter(([key]) => allowed(user.role, user.permissions, key)).map(([key, label]) => <Button key={key} variant={module === key ? 'default' : 'outline'} onClick={() => { setModule(key); setStatus(''); }}>{label}</Button>)}
+      </div>
+      {error && <p role="alert">{error.message}</p>}
+      {status && <p role="status" className="status">{status}</p>}
+
+      {module === 'settings' ? (
+        <form key={rows.map(r => r['value']).join('|')} className="cms-form settings-form" onSubmit={async e => {
+          e.preventDefault();
+          const data = Object.fromEntries(new FormData(e.currentTarget).entries());
+          try { await settingsSave({ data: Object.fromEntries(Object.entries(data).map(([k, v]) => [k, String(v)])) }); setStatus('Settings saved.'); await refresh(); }
+          catch (err) { setStatus(err instanceof Error ? err.message : 'Save failed.'); }
+        }}>
+          {rows.map(row => <label key={String(row['key'])}>{String(row['key']).replaceAll('_', ' ')}<textarea name={String(row['key'])} defaultValue={String(row['value'] ?? '')} rows={String(row['value'] ?? '').length > 120 || String(row['value'] ?? '').includes('\n') ? 4 : 1} /></label>)}
+          <MediaUpload module="settings" accept="video/mp4,video/webm" label="Upload hero video" onUploaded={url => { const input = document.querySelector<HTMLTextAreaElement>('textarea[name=hero_video]'); if (input) input.value = url; }} />
+          <Button type="submit"><Save />Save settings</Button>
+        </form>
+      ) : (
+        <>
+          <div className="admin-heading"><h2>{title}</h2>{canAdd && <Button onClick={() => setEditing({})}><Plus />Add</Button>}</div>
+          <div className="admin-list">
+            {rows.length ? rows.map(row => (
+              <article key={String(row['id'])}>
+                <div>
+                  <strong>{row['title'] ?? row['name'] ?? row['type'] ?? row['id']}</strong>
+                  <p className="status">{module === 'events' ? [row['branch'], row['kind'] === 'fixed' ? 'Branch program' : row['start_date']].filter(Boolean).join(' · ') : module === 'prayer_requests' ? `${Number(row['is_published']) === 1 ? 'Published' : 'Waiting to be published'} — ${row['request']}` : row['email'] ?? row['code'] ?? row['description'] ?? row['request'] ?? row['highlighted_text']}</p>
+                </div>
+                {module !== 'bookmarks' && (
+                  <div className="flex gap-2">
+                    {module === 'prayer_requests' && Number(row['is_published']) !== 1 && <Button size="sm" onClick={async () => { try { await save({ data: { module, id: Number(row['id']), values: { is_published: 1 } } }); await refresh(); setStatus('Prayer request published.'); } catch (err) { setStatus(err instanceof Error ? err.message : 'Publish failed.'); } }}>Publish</Button>}
+                    {module === 'bibles' && <Button variant="outline" size="icon" title="Edit verses" aria-label="Edit verses" onClick={() => setEditingText(row)}><BookText size={16} /></Button>}
+                    <Button variant="outline" size="icon" title="Edit" aria-label="Edit item" onClick={() => setEditing(row)}><Pencil size={16} /></Button>
+                    <Button variant="outline" size="icon" title="Delete" aria-label="Delete item" onClick={async () => {
+                      if (!window.confirm(`Delete ${row['title'] ?? row['name'] ?? 'this item'}? This cannot be undone.`)) return;
+                      try { if (module === 'admins') await adminRemove({ data: { id: Number(row['id']) } }); else await remove({ data: { module, id: Number(row['id']) } }); await refresh(); }
+                      catch (err) { setStatus(err instanceof Error ? err.message : 'Delete failed.'); }
+                    }}><Trash2 size={16} /></Button>
+                  </div>
+                )}
+              </article>
+            )) : <p className="status">No records yet.</p>}
+          </div>
+        </>
+      )}
+
+      <Dialog open={editing !== null} onOpenChange={open => { if (!open) setEditing(null); }}>
+        <DialogContent className="cms-dialog">
+          <DialogTitle>{editing?.['id'] ? 'Edit' : 'Add'} {module === 'admins' ? 'administrator' : isModule(module) ? modules[module].label : 'item'}</DialogTitle>
+          <DialogDescription className="sr-only">Fill in the details and save.</DialogDescription>
+          {editing && (
+            <form className="cms-form" onSubmit={submitItem}>
+              {module === 'admins' ? (
+                <>
+                  <label>Name<input name="name" required defaultValue={String(editing['name'] ?? '')} /></label>
+                  <label>Email<input name="email" type="email" required defaultValue={String(editing['email'] ?? '')} /></label>
+                  <label>New password<input name="password" type="password" minLength={12} required={!editing['id']} autoComplete="new-password" /></label>
+                  <label>Role<select name="role" defaultValue={String(editing['role'] ?? 'editor')}><option value="editor">Editor</option><option value="super_admin">Super administrator</option></select></label>
+                  <label className="check-label"><input type="checkbox" name="active" defaultChecked={editing['active'] !== 0} />Active</label>
+                  <fieldset><legend>Module permissions</legend>{[...Object.keys(modules), 'settings', 'bookmarks'].map(key => <label key={key} className="check-label"><input type="checkbox" name="permissions" value={key} defaultChecked={String(editing['permissions'] ?? '').includes(`"${key}"`)} />{key.replaceAll('_', ' ')}</label>)}</fieldset>
+                </>
+              ) : isModule(module) ? (
+                <>
+                  {modules[module].fields.map(name => (
+                    <label key={name}>
+                      {labels[name] ?? name.replaceAll('_', ' ')}
+                      <FieldInput module={module} name={name} row={editing} />
+                      {hints[name] && <span className="field-hint">{hints[name]}</span>}
+                    </label>
+                  ))}
+                  <div className="upload-row">
+                    {uploadsFor(module).map(u => (
+                      <MediaUpload key={u.label} module={module} accept={u.accept} label={u.label}
+                        prepare={u.prepare ? file => u.prepare!(file, document.querySelector<HTMLFormElement>('.cms-dialog form')) : undefined}
+                        onUploaded={(url, file) => { const name = u.target(file); const input = field(document.querySelector<HTMLFormElement>('.cms-dialog form'), name); if (input) input.value = url; }} />
+                    ))}
+                  </div>
+                </>
+              ) : null}
+              <Button type="submit"><Save />Save</Button>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {editingText && <BibleEditor row={editingText} onClose={() => setEditingText(null)} onSaved={async () => { setEditingText(null); await refresh(); setStatus('Bible text updated.'); }} />}
+    </main>
+  );
+}
+
+/** Lets an administrator correct the verses of an uploaded Bible, one chapter at a time. */
+function BibleEditor({ row, onClose, onSaved }: { row: Row; onClose: () => void; onSaved: () => Promise<void> }) {
+  const [bible, setBible] = useState<BibleData | null>(null);
+  const [book, setBook] = useState(0);
+  const [chapter, setChapter] = useState(0);
+  const [status, setStatus] = useState('Opening the Bible text…');
+  const [busy, setBusy] = useState(false);
+  const save = useServerFn(saveContent);
+  useEffect(() => {
+    let live = true;
+    fetch(String(row['text_url']), { cache: 'no-store' })
+      .then(r => { if (!r.ok) throw new Error(); return r.json() as Promise<BibleData>; })
+      .then(b => { if (live) { setBible(b); setStatus(''); } })
+      .catch(() => { if (live) setStatus('This Bible text could not be opened.'); });
+    return () => { live = false; };
+  }, [row]);
+  const verses = bible?.books[book]?.chapters[chapter] ?? [];
+
+  return (
+    <Dialog open onOpenChange={open => { if (!open) onClose(); }}>
+      <DialogContent className="cms-dialog">
+        <DialogTitle>Edit verses — {String(row['name'])}</DialogTitle>
+        <DialogDescription>Each line is one verse, starting with its number. Saving publishes the corrected text for everyone.</DialogDescription>
+        {bible && (
+          <div className="cms-form">
+            <div className="upload-row">
+              <label>Book<select value={book} onChange={e => { setBook(Number(e.target.value)); setChapter(0); }}>{bible.books.map((b, i) => <option key={b.name} value={i}>{b.name}</option>)}</select></label>
+              <label>Chapter<select value={chapter} onChange={e => setChapter(Number(e.target.value))}>{(bible.books[book]?.chapters ?? []).map((_, i) => <option key={i} value={i}>{i + 1}</option>)}</select></label>
+            </div>
+            <form key={`${book}-${chapter}`} className="cms-form" onSubmit={async e => {
+              e.preventDefault();
+              const text = String(new FormData(e.currentTarget).get('verses') ?? '');
+              const lines = text.split(/\r?\n/).filter(l => l.trim()).map(l => l.replace(/^\s*\d+\s/, '').trim());
+              const updated: BibleData = { ...bible, books: bible.books.map((b, bi) => bi !== book ? b : { ...b, chapters: b.chapters.map((c, ci) => ci !== chapter ? c : lines) }) };
+              setBusy(true); setStatus('Saving…');
+              try {
+                const url = await uploadMedia('bibles', new File([JSON.stringify(updated)], `${bible.code}.json`, { type: 'application/json' }));
+                await save({ data: { module: 'bibles', id: Number(row['id']), values: { text_url: url } } });
+                await onSaved();
+              } catch (err) { setStatus(err instanceof Error ? err.message : 'Save failed.'); setBusy(false); }
+            }}>
+              <textarea name="verses" rows={14} defaultValue={verses.map((v, i) => `${i + 1} ${v}`).join('\n')} />
+              <Button type="submit" disabled={busy}><Save />{busy ? 'Saving…' : 'Save chapter'}</Button>
+            </form>
+          </div>
+        )}
+        {status && <p role="status" className="status">{status}</p>}
+      </DialogContent>
+    </Dialog>
+  );
+}

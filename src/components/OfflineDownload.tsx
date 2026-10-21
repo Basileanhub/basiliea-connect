@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { CheckCircle2, Download, LoaderCircle, Trash2 } from 'lucide-react';
 import { Button } from './ui/button';
 
-const CACHE = 'bmi-downloads';
+export const DOWNLOAD_CACHE = 'bmi-downloads';
+const CACHE = DOWNLOAD_CACHE;
 type State = 'checking' | 'none' | 'saving' | 'saved' | 'error';
 
 /** Tracks whether a file is saved on this device for offline use. */
