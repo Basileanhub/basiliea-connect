@@ -1,6 +1,17 @@
 import { useState } from 'react';
 import { Upload } from 'lucide-react';
 
+/** Sends a file to the ministry's media storage and returns its address. */
+export async function uploadMedia(module: string, file: File): Promise<string> {
+  const data = new FormData();
+  data.set('module', module);
+  data.set('file', file);
+  const response = await fetch('/api/media/upload', { method: 'POST', body: data });
+  const result = await response.json().catch(() => ({})) as { url?: string; error?: string };
+  if (!result.url) throw new Error(result.error ?? 'Upload failed.');
+  return result.url;
+}
+
 /** Uploads a file to the ministry's media storage and returns its address. `prepare` may convert the file first. */
 export function MediaUpload({ module, accept, label = 'Upload file', onUploaded, prepare }: { module: string; accept: string; label?: string; onUploaded: (url: string, file: File) => void; prepare?: (file: File) => Promise<File> }) {
   const [status, setStatus] = useState('');
@@ -16,13 +27,9 @@ export function MediaUpload({ module, accept, label = 'Upload file', onUploaded,
           setStatus('Uploading…');
           try {
             const file = prepare ? await prepare(chosen) : chosen;
-            const data = new FormData();
-            data.set('module', module);
-            data.set('file', file);
-            const response = await fetch('/api/media/upload', { method: 'POST', body: data });
-            const result = await response.json() as { url?: string; error?: string };
-            if (result.url) { onUploaded(result.url, chosen); setStatus('Uploaded. Save to publish.'); }
-            else setStatus(result.error ?? 'Upload failed.');
+            const url = await uploadMedia(module, file);
+            onUploaded(url, chosen);
+            setStatus('Uploaded. Save to publish.');
           } catch (err) { setStatus(err instanceof Error ? err.message : 'Upload failed.'); }
         }} />
       </label>
