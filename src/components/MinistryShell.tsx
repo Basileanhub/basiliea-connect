@@ -91,7 +91,7 @@ export function MinistryShell({ children }: { children: ReactNode }) {
               <nav className="drawer-nav">
                 <SheetClose asChild><Link to="/"><Home size={18} />Home</Link></SheetClose>
                 {ministryLinks.map(item => <SheetClose asChild key={item.to}><Link to={item.to}><item.icon size={18} />{item.label}</Link></SheetClose>)}
-                <SheetClose asChild><Link to={user?.kind === 'admin' ? '/admin' : '/admin/login'}><Settings size={18} />{user?.kind === 'admin' ? 'Studio' : 'Administrator sign-in'}</Link></SheetClose>
+                {user?.kind === 'admin' && <SheetClose asChild><Link to="/admin"><Settings size={18} />Studio</Link></SheetClose>}
               </nav>
               {user && <Button className="mt-5" variant="outline" onClick={async () => { await qc.cancelQueries(); qc.clear(); await logout(); await navigate({ to: '/', replace: true }); }}><LogOut />Sign out</Button>}
             </SheetContent>

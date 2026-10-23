@@ -5,7 +5,7 @@ import { ArrowRight, Pause, Play, CalendarDays, MapPin, NotebookPen, BookOpenChe
 import { Button } from '@/components/ui/button';
 import { pageMeta } from '@/lib/page-meta';
 import { contentOptions } from '@/lib/content-query';
-import { formatDate, upcomingEvents, type Occurrence } from '@/lib/events-calendar';
+import { formatDate, upcomingPrograms, ymd, type ProgramDay } from '@/lib/events-calendar';
 import type { Row } from '@/lib/cms-model';
 import worship from '@/assets/worship.jpg';
 import welcome from '@/assets/bmi-welcome.mp4.asset.json';
@@ -34,16 +34,20 @@ function Home() {
   return (
     <main>
       <section className="hero">
-        <video ref={video} className="hero-image" src={videoSrc} poster={worship} autoPlay muted loop playsInline preload="metadata" aria-hidden="true" />
-        <div className="container-main hero-content">
-          <div className="eyebrow">{s['hero_tagline']}</div>
-          <h1>{s['hero_title']}</h1>
-          {s['hero_description'] && <p className="hero-description">{s['hero_description']}</p>}
-        </div>
-        <div className="hero-controls">
+        <div className="container-main hero-layout">
+          <div className="hero-content">
+            <div className="eyebrow">{s['hero_tagline']}</div>
+            <h1>{s['hero_title']}</h1>
+            {s['hero_description'] && <p className="hero-description">{s['hero_description']}</p>}
+          </div>
+          <div className="hero-frame">
+            <video ref={video} className="hero-video" src={videoSrc} poster={worship} autoPlay muted loop playsInline preload="metadata" aria-hidden="true" />
+            <div className="hero-controls">
           <Button variant="hero" size="icon" aria-label={paused ? 'Play welcome video' : 'Pause welcome video'} onClick={() => { const v = video.current; if (!v) return; if (paused) void v.play(); else v.pause(); setPaused(!paused); }}>
             {paused ? <Play /> : <Pause />}
           </Button>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -67,28 +71,28 @@ function Home() {
 }
 
 function EventsSlider({ events, label, cta }: { events: Row[]; label: string; cta: string }) {
-  const [today, setToday] = useState<Date | null>(null);
+  const [todayKey, setTodayKey] = useState('');
   const [index, setIndex] = useState(0);
   const [hold, setHold] = useState(false);
-  useEffect(() => setToday(new Date()), []);
-  const slides: Occurrence[] = useMemo(() => (today ? upcomingEvents(events, today) : []), [events, today]);
+  useEffect(() => { const d = new Date(); setTodayKey(ymd(d.getFullYear(), d.getMonth(), d.getDate())); }, []);
+  const slides: ProgramDay[] = useMemo(() => (todayKey ? upcomingPrograms(events, todayKey) : []), [events, todayKey]);
   useEffect(() => {
     if (slides.length < 2 || hold) return;
     const timer = setInterval(() => setIndex(i => (i + 1) % slides.length), 5000);
     return () => clearInterval(timer);
   }, [slides.length, hold]);
   const slide = slides[index % Math.max(slides.length, 1)];
-  const image = slide ? events.find(e => String(e['id']) === slide.id)?.['image_url'] : null;
+  const image = slide?.image;
 
   return (
     <div className="weekly-block events-slider" onMouseEnter={() => setHold(true)} onMouseLeave={() => setHold(false)} onFocus={() => setHold(true)} onBlur={() => setHold(false)}>
       <div className="weekly-label"><CalendarDays size={18} />{label}</div>
       <div className="slide-window" aria-live="polite">
         {slide ? (
-          <div key={`${slide.id}-${slide.date}`} className="event-slide">
+          <div key={slide.id} className="event-slide">
             <p className="slide-date">{formatDate(slide.date)}</p>
             <h2>{slide.title}</h2>
-            <p className="slide-meta">{[slide.branch, slide.location].filter(Boolean).map(t => <span key={t}><MapPin size={14} />{t}</span>)}</p>
+            <p className="slide-meta">{[slide.time, slide.location].filter(Boolean).map(t => <span key={t}><MapPin size={14} />{t}</span>)}</p>
             {slide.description && <p className="slide-description">{slide.description}</p>}
             {image && <div className="weekly-cover"><img src={String(image)} alt={slide.title} /></div>}
           </div>

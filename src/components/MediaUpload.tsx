@@ -13,7 +13,7 @@ export async function uploadMedia(module: string, file: File): Promise<string> {
 }
 
 /** Uploads a file to the ministry's media storage and returns its address. `prepare` may convert the file first. */
-export function MediaUpload({ module, accept, label = 'Upload file', onUploaded, prepare }: { module: string; accept: string; label?: string; onUploaded: (url: string, file: File) => void; prepare?: (file: File) => Promise<File> }) {
+export function MediaUpload({ module, accept, label = 'Upload file', onUploaded, prepare }: { module: string; accept: string; label?: string; onUploaded: (url: string, file: File) => void; prepare?: ((file: File) => Promise<File>) | undefined }) {
   const [status, setStatus] = useState('');
   return (
     <span className="media-upload">

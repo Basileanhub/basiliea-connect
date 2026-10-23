@@ -7,18 +7,17 @@ import { modules, isModule, allowed, defaultPreacher, type Row, type Module } fr
 import { adminRows, saveContent, deleteContent, saveSettings } from '@/lib/cms.functions';
 import { saveAdmin, removeAdmin } from '@/lib/auth.functions';
 import { identityOptions } from '@/lib/content-query';
-import { recurrenceOptions } from '@/lib/events-calendar';
 import { parseBibleText, type BibleData } from '@/lib/bible-text';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from './ui/dialog';
 import { MediaUpload, uploadMedia } from './MediaUpload';
 
 const labels: Record<string, string> = {
-  kind: 'Type', recurrence: 'Repeats', dates: 'Set dates (override the repeating rule)', text_url: 'Bible text file', pdf_url: 'Bible PDF (optional)',
+  event_date: 'Program day', time: 'Time (e.g. 5:00 PM)', branch: 'Branch (optional)', text_url: 'Bible text file', pdf_url: 'Bible PDF (optional)',
   code: 'Short code (e.g. KJV)', name: 'Name', start_date: 'Start date', end_date: 'End date', is_pinned: 'Pinned', image_url: 'Image',
 };
 const hints: Record<string, string> = {
-  dates: 'One date per line as YYYY-MM-DD. Dates entered for a month replace the repeating rule for that month only.',
+  event_date: 'Only days you add here are highlighted on the calendar. All other days show as free.',
   text_url: 'Upload a .json Bible, or a .txt file with one verse per line, like "Genesis 1:1 In the beginning…".',
 };
 
@@ -27,13 +26,11 @@ function field(form: HTMLFormElement | null | undefined, name: string) { return 
 function FieldInput({ module, name, row }: { module: Module; name: string; row: Row }) {
   const value = String(row[name] ?? (name === 'preacher' ? defaultPreacher : ''));
   if (name.startsWith('is_')) return <select name={name} defaultValue={String(row[name] ?? (name === 'is_pinned' || name === 'is_answered' ? 0 : 1))}><option value="1">Yes</option><option value="0">No</option></select>;
-  if (module === 'events' && name === 'kind') return <select name={name} defaultValue={value || 'special'}><option value="special">Special event (set start and end date)</option><option value="fixed">Branch program (repeats)</option></select>;
-  if (module === 'events' && name === 'recurrence') return <select name={name} defaultValue={value}>{recurrenceOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}</select>;
-  if (/^(date|start_date|end_date|published_at)$/.test(name)) return <input type="date" name={name} defaultValue={value.slice(0, 10)} />;
+  if (/^(date|event_date|published_at)$/.test(name)) return <input type="date" required={name === 'event_date'} name={name} defaultValue={value.slice(0, 10)} />;
   if (name === 'scheduled_at') return <input type="datetime-local" name={name} defaultValue={value.slice(0, 16)} />;
   if (name === 'day_number' || name === 'sort_order') return <input type="number" name={name} defaultValue={value || '0'} />;
-  const long = name === 'content' || name === 'description' || name === 'request' || name === 'dates';
-  const required = name === 'title' || name === 'request' || (module === 'library' && name === 'file_url') || (module === 'bibles' && (name === 'code' || name === 'name' || name === 'text_url'));
+  const long = name === 'content' || name === 'description' || name === 'request';
+  const required = name === 'title' || name === 'event_date' || name === 'request' || (module === 'library' && name === 'file_url') || (module === 'bibles' && (name === 'code' || name === 'name' || name === 'text_url'));
   return <textarea name={name} required={required} rows={long ? 5 : 1} defaultValue={value} />;
 }
 
@@ -137,7 +134,7 @@ export function AdminPanel({ settings = false }: { settings?: boolean }) {
               <article key={String(row['id'])}>
                 <div>
                   <strong>{row['title'] ?? row['name'] ?? row['type'] ?? row['id']}</strong>
-                  <p className="status">{module === 'events' ? [row['branch'], row['kind'] === 'fixed' ? 'Branch program' : row['start_date']].filter(Boolean).join(' · ') : module === 'prayer_requests' ? `${Number(row['is_published']) === 1 ? 'Published' : 'Waiting to be published'} — ${row['request']}` : row['email'] ?? row['code'] ?? row['description'] ?? row['request'] ?? row['highlighted_text']}</p>
+                  <p className="status">{module === 'events' ? [row['event_date'], row['time'], row['location']].filter(Boolean).join(' · ') : module === 'prayer_requests' ? `${Number(row['is_published']) === 1 ? 'Published' : 'Waiting to be published'} — ${row['request']}` : row['email'] ?? row['code'] ?? row['description'] ?? row['request'] ?? row['highlighted_text']}</p>
                 </div>
                 {module !== 'bookmarks' && (
                   <div className="flex gap-2">

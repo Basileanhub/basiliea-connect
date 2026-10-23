@@ -3,7 +3,7 @@ export const modules = {
  reading_plans: { label:'Reading Plan', fields:['title','day_number','book','chapters','content','date'] },
  sermons: { label:'The Word', fields:['title','preacher','description','audio_url','cover_image_url','duration','category','date','is_published'] },
  library: { label:'Library', fields:['title','author','description','file_url','cover_image_url','published_at'] },
- events: { label:'Events', fields:['title','kind','branch','recurrence','dates','description','location','image_url','start_date','end_date','registration_link','is_pinned'] },
+ events: { label:'Events', fields:['title','event_date','time','location','description','image_url','branch'] },
  bibles: { label:'Bibles', fields:['code','name','text_url','pdf_url','sort_order','is_published'] },
  broadcasts: { label:'Live Broadcast', fields:['title','embed_url','is_live','scheduled_at'] },
  prayer_requests: { label:'Prayer Wall', fields:['name','request','is_published','is_answered'] },
