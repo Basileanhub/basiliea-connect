@@ -24,6 +24,7 @@
 - [ ] Mission text moves to the footer.
 
 ## Waiting on others
+- [ ] Reconnect Cloudflare and Resend in the new workspace (project moved).
 - [ ] Verify wearebmi.org in Resend (DNS records) so sign-up codes reach every member.
 - [ ] Public "Continue with Google" — waiting for Google Client ID and Client Secret.
 - [ ] Real ministry sermons, devotions, reading plans, books — added by admins in Studio.
