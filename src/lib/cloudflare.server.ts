@@ -1,7 +1,7 @@
 import { getSession } from '@tanstack/react-start/server';
 import type { Row } from './cms-model';
-const account='90357f553484eaff4eb76be861ed8001';
-const database='2267907d-aef3-46d3-bc8d-b755c9892bc7';
+const account='fda9424d5772fa597ccab41db9de2c50';
+const database='c7c887ca-95fe-4644-94df-54045938beff';
 export function gateway() {
  const base=process.env['CONNECTOR_GATEWAY_BASE_URL']??'https://connector-gateway.lovable.dev';
  const key=process.env['CLOUDFLARE_API_KEY'];const lovable=process.env['LOVABLE_API_KEY'];

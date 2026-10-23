@@ -8,7 +8,7 @@ export const publicContent=createServerFn({method:'GET'}).handler(async()=>{
  const [devotions,sermons,events,library,reading_plans,broadcasts,bibles,prayers]=await Promise.all([
   query('SELECT * FROM devotions WHERE is_published=1 ORDER BY date DESC LIMIT 100'),
   query('SELECT * FROM sermons WHERE is_published=1 ORDER BY date DESC LIMIT 100'),
-  query('SELECT * FROM events ORDER BY is_pinned DESC,created_at DESC LIMIT 200'),
+  query('SELECT * FROM events WHERE event_date>=date('now','-62 days') ORDER BY event_date,time LIMIT 400'),
   query('SELECT * FROM library ORDER BY published_at DESC LIMIT 100'),
   query('SELECT * FROM reading_plans ORDER BY date DESC LIMIT 100'),
   query('SELECT * FROM broadcasts ORDER BY id DESC LIMIT 10'),
@@ -24,7 +24,7 @@ export const adminRows=createServerFn({method:'POST'}).inputValidator(z.object({
  if(data.module==='bookmarks')return query('SELECT id,type,ref_id,color,highlighted_text,note,created_at FROM bookmarks ORDER BY created_at DESC LIMIT 100');
  if(data.module==='admins'){const user=await requireAdmin();if(user.role!=='super_admin')throw new Error('Super administrator access required.');return query('SELECT id,name,email,role,permissions,active FROM admins');}
  if(!isModule(data.module))throw new Error('Unknown module.');
- const order=data.module==='prayer_requests'?'is_published ASC,id DESC':data.module==='bibles'?'sort_order,id':'id DESC';
+ const order=data.module==='prayer_requests'?'is_published ASC,id DESC':data.module==='bibles'?'sort_order,id':data.module==='events'?'event_date DESC':'id DESC';
  return query(`SELECT * FROM ${data.module} ORDER BY ${order} LIMIT 200`);
 });
 export const saveContent=createServerFn({method:'POST'}).inputValidator(z.object({module:z.string(),id:z.number().optional(),values:z.record(z.union([z.string().max(100000),z.number(),z.null()]))})).handler(async({data})=>{
