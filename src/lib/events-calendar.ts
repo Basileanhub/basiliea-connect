@@ -45,8 +45,8 @@ export function calendarLink(p: ProgramDay) {
   const m = p.time.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i);
   let dates = `${day}/${ymd(...nextDay(p.date)).replaceAll('-', '')}`;
   if (m) {
-    let h = Number(m[1]) % 12 + (m[3]?.toLowerCase() === 'pm' ? 12 : m[3] ? 0 : Number(m[1]) === 12 ? 12 : 0);
-    if (!m[3]) h = Number(m[1]);
+    let h = Number(m[1]); const ap = m[3]?.toLowerCase();
+    if (ap === 'pm' && h < 12) h += 12; if (ap === 'am' && h === 12) h = 0;
     const start = `${day}T${String(h).padStart(2, '0')}${m[2] ?? '00'}00`;
     const end = `${day}T${String(Math.min(h + 2, 23)).padStart(2, '0')}${m[2] ?? '00'}00`;
     dates = `${start}/${end}`;
