@@ -8,7 +8,7 @@ export const publicContent=createServerFn({method:'GET'}).handler(async()=>{
  const [devotions,sermons,events,library,reading_plans,broadcasts,bibles,prayers]=await Promise.all([
   query('SELECT * FROM devotions WHERE is_published=1 ORDER BY date DESC LIMIT 100'),
   query('SELECT * FROM sermons WHERE is_published=1 ORDER BY date DESC LIMIT 100'),
-  query('SELECT * FROM events WHERE event_date>=date('now','-62 days') ORDER BY event_date,time LIMIT 400'),
+  query("SELECT * FROM events WHERE event_date>=date('now','-62 days') ORDER BY event_date,time LIMIT 400"),
   query('SELECT * FROM library ORDER BY published_at DESC LIMIT 100'),
   query('SELECT * FROM reading_plans ORDER BY date DESC LIMIT 100'),
   query('SELECT * FROM broadcasts ORDER BY id DESC LIMIT 10'),

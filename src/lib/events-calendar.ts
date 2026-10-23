@@ -1,103 +1,59 @@
 import type { Row } from './cms-model';
 
-export type Occurrence = { id: string; date: string; title: string; branch: string; kind: 'fixed' | 'special'; description: string; location: string };
+/** One program on one day. Admins create a row only for days that have a program. */
+export type ProgramDay = { id: string; date: string; title: string; time: string; location: string; description: string; image: string; branch: string };
 
-const weekdays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-const ordinals = ['first', 'second', 'third', 'fourth'];
-
-export const recurrenceOptions: { value: string; label: string }[] = [
-  { value: '', label: 'No repeating rule (use dates only)' },
-  ...weekdays.map(d => ({ value: `every-${d}`, label: `Every ${cap(d)}` })),
-  ...ordinals.flatMap(o => weekdays.map(d => ({ value: `${o}-${d}`, label: `${cap(o)} ${cap(d)} of every month` }))),
-  ...weekdays.map(d => ({ value: `last-${d}`, label: `Last ${cap(d)} of every month` })),
-  ...ordinals.map(o => ({ value: `${o}-week`, label: `${cap(o)} week of every month` })),
-];
-
-function cap(s: string) { return s.charAt(0).toUpperCase() + s.slice(1); }
 export function ymd(year: number, month: number, day: number) { return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`; }
 function daysIn(year: number, month: number) { return new Date(Date.UTC(year, month + 1, 0)).getUTCDate(); }
-function weekday(year: number, month: number, day: number) { return new Date(Date.UTC(year, month, day)).getUTCDay(); }
 
-/** Days of the month (1-based) on which a repeating rule falls. */
-export function ruleDays(rule: string | null | undefined, year: number, month: number): number[] {
-  if (!rule) return [];
-  const [which, what] = rule.toLowerCase().split('-');
-  const total = daysIn(year, month);
-  const all = Array.from({ length: total }, (_, i) => i + 1);
-  if (what === 'week') {
-    const index = ordinals.indexOf(which ?? '');
-    if (index < 0) return [];
-    return all.filter(d => d > index * 7 && d <= (index + 1) * 7);
-  }
-  const target = weekdays.indexOf(what ?? '');
-  if (target < 0) return [];
-  const matching = all.filter(d => weekday(year, month, d) === target);
-  if (which === 'every') return matching;
-  if (which === 'last') return matching.slice(-1);
-  const index = ordinals.indexOf(which ?? '');
-  return index >= 0 && matching[index] ? [matching[index]] : [];
+export function toProgram(row: Row): ProgramDay | null {
+  const date = String(row['event_date'] ?? '').slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
+  const s = (k: string) => String(row[k] ?? '').trim();
+  return { id: String(row['id']), date, title: s('title'), time: s('time'), location: s('location'), description: s('description'), image: s('image_url'), branch: s('branch') };
 }
 
-/** Admin-entered dates, one per line or comma separated, as YYYY-MM-DD. */
-export function parseDates(value: unknown): string[] {
-  return String(value ?? '').split(/[\s,]+/).filter(d => /^\d{4}-\d{2}-\d{2}$/.test(d)).sort();
+/** Programs grouped by date (YYYY-MM-DD). Days absent from the map are free days. */
+export function programsByDay(rows: Row[]): Map<string, ProgramDay[]> {
+  const map = new Map<string, ProgramDay[]>();
+  for (const r of rows) { const p = toProgram(r); if (p) map.set(p.date, [...(map.get(p.date) ?? []), p]); }
+  return map;
 }
 
-/**
- * Occurrences in a month. For a fixed program, dates the admin entered for that month
- * replace the repeating rule for that month only.
- */
-export function occurrencesForMonth(events: Row[], year: number, month: number): Occurrence[] {
-  const prefix = ymd(year, month, 1).slice(0, 7);
-  const out: Occurrence[] = [];
-  for (const e of events) {
-    const base = { id: String(e['id']), title: String(e['title'] ?? ''), branch: String(e['branch'] ?? ''), description: String(e['description'] ?? ''), location: String(e['location'] ?? '') };
-    if (String(e['kind'] ?? 'special') === 'fixed') {
-      const explicit = parseDates(e['dates']).filter(d => d.startsWith(prefix));
-      const dates = explicit.length ? explicit : ruleDays(String(e['recurrence'] ?? ''), year, month).map(d => ymd(year, month, d));
-      for (const date of dates) out.push({ ...base, kind: 'fixed', date });
-    } else {
-      const start = String(e['start_date'] ?? '').slice(0, 10);
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(start)) continue;
-      const endRaw = String(e['end_date'] ?? '').slice(0, 10);
-      const end = /^\d{4}-\d{2}-\d{2}$/.test(endRaw) && endRaw >= start ? endRaw : start;
-      for (let d = 1; d <= daysIn(year, month); d++) {
-        const date = ymd(year, month, d);
-        if (date >= start && date <= end) out.push({ ...base, kind: 'special', date });
-      }
-    }
-  }
-  return out.sort((a, b) => a.date.localeCompare(b.date) || a.title.localeCompare(b.title));
+/** Month grid cells, weeks starting Monday. null = padding before day 1. */
+export function monthCells(year: number, month: number): (number | null)[] {
+  const lead = (new Date(Date.UTC(year, month, 1)).getUTCDay() + 6) % 7;
+  return [...Array.from({ length: lead }, () => null), ...Array.from({ length: daysIn(year, month) }, (_, i) => i + 1)];
 }
 
-/** The next date of each event, from today, ordered soonest first. */
-export function upcomingEvents(events: Row[], today: Date, monthsAhead = 3): Occurrence[] {
-  const todayKey = ymd(today.getFullYear(), today.getMonth(), today.getDate());
-  const seen = new Set<string>();
-  const out: Occurrence[] = [];
-  for (let i = 0; i <= monthsAhead; i++) {
-    const d = new Date(today.getFullYear(), today.getMonth() + i, 1);
-    for (const o of occurrencesForMonth(events, d.getFullYear(), d.getMonth())) {
-      if (o.date < todayKey || seen.has(o.id)) continue;
-      seen.add(o.id);
-      out.push(o);
-    }
-  }
-  return out.sort((a, b) => a.date.localeCompare(b.date));
+/** Programs from today onwards, soonest first. */
+export function upcomingPrograms(rows: Row[], todayKey: string, limit = 8): ProgramDay[] {
+  return rows.map(toProgram).filter((p): p is ProgramDay => !!p && p.date >= todayKey).sort((a, b) => a.date.localeCompare(b.date)).slice(0, limit);
 }
+
+/** "Title • 5:00 PM • Town Square" — parts that are empty are left out. */
+export function cellSummary(p: ProgramDay) { return [p.title, p.time, p.location].filter(Boolean).join(' • '); }
 
 export function formatDate(date: string, opts: Intl.DateTimeFormatOptions = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) {
   const [y, m, d] = date.split('-').map(Number);
   return new Date(Date.UTC(y ?? 1970, (m ?? 1) - 1, d ?? 1)).toLocaleDateString('en-GB', { ...opts, timeZone: 'UTC' });
 }
 
-/** Human wording for a repeating rule, e.g. "Last Saturday of every month". */
-export function ruleLabel(rule: string | null | undefined) {
-  return recurrenceOptions.find(o => o.value && o.value === rule)?.label ?? '';
+/** Google Calendar link for an all-day (or timed, when "5:00 PM" style time is given) program. */
+export function calendarLink(p: ProgramDay) {
+  const day = p.date.replaceAll('-', '');
+  const m = p.time.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i);
+  let dates = `${day}/${ymd(...nextDay(p.date)).replaceAll('-', '')}`;
+  if (m) {
+    let h = Number(m[1]) % 12 + (m[3]?.toLowerCase() === 'pm' ? 12 : m[3] ? 0 : Number(m[1]) === 12 ? 12 : 0);
+    if (!m[3]) h = Number(m[1]);
+    const start = `${day}T${String(h).padStart(2, '0')}${m[2] ?? '00'}00`;
+    const end = `${day}T${String(Math.min(h + 2, 23)).padStart(2, '0')}${m[2] ?? '00'}00`;
+    dates = `${start}/${end}`;
+  }
+  const q = new URLSearchParams({ action: 'TEMPLATE', text: p.title, dates, details: p.description, location: p.location, ctz: 'Africa/Lagos' });
+  return `https://calendar.google.com/calendar/render?${q}`;
 }
+function nextDay(date: string): [number, number, number] { const [y, m, d] = date.split('-').map(Number); const n = new Date(Date.UTC(y!, m! - 1, d! + 1)); return [n.getUTCFullYear(), n.getUTCMonth(), n.getUTCDate()]; }
 
-/** Calendar cells for a month: leading blanks (null) so day 1 sits under its weekday (weeks start Sunday). */
-export function monthCells(year: number, month: number): (number | null)[] {
-  const lead = weekday(year, month, 1);
-  return [...Array.from({ length: lead }, () => null), ...Array.from({ length: daysIn(year, month) }, (_, i) => i + 1)];
-}
+export function directionsLink(location: string) { return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(location)}`; }
