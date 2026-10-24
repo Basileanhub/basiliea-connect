@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 
 import { MinistryShell } from "@/components/MinistryShell";
 import { registerOfflineApp } from "@/lib/pwa";
+import { contentOptions } from "@/lib/content-query";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
@@ -82,12 +83,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Basileia Ministries International" },
       { name: "description", content: "The gospel of the Kingdom to every sphere of life." },
-      { name: "author", content: "Lovable" },
+      { name: "author", content: "Basileia Ministries International" },
       { property: "og:title", content: "Basileia Ministries International" },
       { property: "og:description", content: "The gospel of the Kingdom to every sphere of life." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {
@@ -100,6 +100,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" },
     ],
   }),
+  loader: ({ context }) => context.queryClient.ensureQueryData(contentOptions),
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
@@ -122,6 +123,9 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const content = Route.useLoaderData();
+  // Seed the browser cache with the server's copy so the first render matches the server.
+  if (content && !queryClient.getQueryData(contentOptions.queryKey)) queryClient.setQueryData(contentOptions.queryKey, content);
   useEffect(() => { void registerOfflineApp().catch(console.error); }, []);
 
   return (

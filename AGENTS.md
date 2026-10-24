@@ -12,3 +12,5 @@
 - Use TanStack file routes for each public ministry page and shared navigation in the root shell, so every page has a direct address and metadata.
 - Keep Cloudflare calls server-side through the linked connector gateway; D1 and authenticated features must remain unavailable until verified permissions and secure identity handling are configured.
 - Use uploaded Bible assets for document reading/downloads; never label the uploaded Bower book as an NLT translation.
+- Events are one row per program day (event_date); days without a row are free days, so admins control the calendar by adding only program days.
+- Seed the browser query cache from the root route loader so server and browser render the same shared content.
