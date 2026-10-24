@@ -123,6 +123,9 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const content = Route.useLoaderData();
+  // Seed the browser cache with the server's copy so the first render matches the server.
+  if (content && !queryClient.getQueryData(contentOptions.queryKey)) queryClient.setQueryData(contentOptions.queryKey, content);
   useEffect(() => { void registerOfflineApp().catch(console.error); }, []);
 
   return (
