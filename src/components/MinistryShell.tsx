@@ -1,5 +1,5 @@
 import { Link, useNavigate } from '@tanstack/react-router';
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useServerFn } from '@tanstack/react-start';
 import { ArrowRight, UserRound, BookOpen, CalendarDays, Headphones, Radio, HeartHandshake, Mail, Copy, Check, Instagram, Facebook, Youtube, Send, Settings, LogOut, Library, NotebookPen, HandCoins, Home } from 'lucide-react';
@@ -70,6 +70,8 @@ function Brand({ name }: { name: string }) {
 
 export function MinistryShell({ children }: { children: ReactNode }) {
   const [joining, setJoining] = useState(false);
+  const [ready, setReady] = useState(false);
+  useEffect(() => setReady(true), []);
   const { data: content } = useQuery(contentOptions);
   const { data: user } = useQuery(identityOptions);
   const settings = content?.settings ?? {};
@@ -115,10 +117,10 @@ export function MinistryShell({ children }: { children: ReactNode }) {
       <footer className="site-footer">
         <div className="container-main">
           <div className="footer-top">
-            <div className="footer-brand"><Brand name={name} />{settings['footer_text'] && <p>{settings['footer_text']}</p>}</div>
+            <div className="footer-brand"><Brand name={name} />{ready && settings['footer_text'] && <p>{settings['footer_text']}</p>}</div>
             <div className="footer-mission">
-              {settings['mission_title'] && <h2>{settings['mission_title']}</h2>}
-              {settings['mission_body'] && <p>{settings['mission_body']}</p>}
+              {ready && settings['mission_title'] && <h2>{settings['mission_title']}</h2>}
+              {ready && settings['mission_body'] && <p>{settings['mission_body']}</p>}
             </div>
           </div>
           <div className="footer-bottom">
