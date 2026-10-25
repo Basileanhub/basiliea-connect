@@ -4,9 +4,12 @@ import { useServerFn } from '@tanstack/react-start';
 import { Link } from '@tanstack/react-router';
 import { Pencil, Trash2, Plus, Settings, Save, BookText } from 'lucide-react';
 import { modules, isModule, allowed, defaultPreacher, type Row, type Module } from '@/lib/cms-model';
-import { adminRows, saveContent, deleteContent, saveSettings } from '@/lib/cms.functions';
+import { adminRows, saveContent, deleteContent, saveSettings, saveOrder } from '@/lib/cms.functions';
 import { saveAdmin, removeAdmin } from '@/lib/auth.functions';
-import { identityOptions } from '@/lib/content-query';
+import { identityOptions, contentOptions } from '@/lib/content-query';
+import { orderedRows } from '@/lib/visual-order';
+import { StudioHomeEditor } from './StudioHomeEditor';
+import { StudioSort, StudioSortableItem } from './StudioSort';
 import { parseBibleText, type BibleData } from '@/lib/bible-text';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from './ui/dialog';
@@ -65,6 +68,7 @@ function uploadsFor(module: Module): { accept: string; label: string; target: (f
 
 export function AdminPanel({ settings = false }: { settings?: boolean }) {
   const { data: user, isPending } = useQuery(identityOptions);
+  const { data: publicData } = useQuery(contentOptions);
   const [module, setModule] = useState(settings ? 'settings' : 'devotions');
   const [editing, setEditing] = useState<Row | null>(null);
   const [editingText, setEditingText] = useState<Row | null>(null);
@@ -76,8 +80,14 @@ export function AdminPanel({ settings = false }: { settings?: boolean }) {
   const settingsSave = useServerFn(saveSettings);
   const adminSave = useServerFn(saveAdmin);
   const adminRemove = useServerFn(removeAdmin);
+  const orderSave = useServerFn(saveOrder);
   const { data: rows = [], error } = useQuery({ queryKey: ['admin-rows', module], queryFn: () => read({ data: { module } }), enabled: user?.kind === 'admin' && allowed(user.role, user.permissions, module), retry: false });
   async function refresh() { await qc.invalidateQueries({ queryKey: ['admin-rows'] }); await qc.invalidateQueries({ queryKey: ['ministry-content'] }); }
+  const displayRows = orderedRows(rows, publicData?.settings[`${module}_order`]);
+  async function reorder(ids: string[]) {
+    if (!window.confirm('Publish this content order?')) return;
+    try { await orderSave({ data: { module, ids } }); await refresh(); setStatus('Order saved.'); } catch (error) { setStatus(error instanceof Error ? error.message : 'Order could not be saved.'); }
+  }
 
   if (isPending) return <main className="container-main section">Loading…</main>;
   if (user?.kind !== 'admin') return <main className="container-main section"><h1>Administrator access</h1><Button asChild><Link to="/admin/login">Sign in as administrator</Link></Button></main>;
@@ -114,6 +124,7 @@ export function AdminPanel({ settings = false }: { settings?: boolean }) {
       </div>
       {error && <p role="alert">{error.message}</p>}
       {status && <p role="status" className="status">{status}</p>}
+      {module === 'settings' && publicData && <StudioHomeEditor initial={publicData.settings} onSaved={refresh} />}
 
       {module === 'settings' ? (
         <form key={rows.map(r => r['value']).join('|')} className="cms-form settings-form" onSubmit={async e => {
@@ -122,16 +133,18 @@ export function AdminPanel({ settings = false }: { settings?: boolean }) {
           try { await settingsSave({ data: Object.fromEntries(Object.entries(data).map(([k, v]) => [k, String(v)])) }); setStatus('Settings saved.'); await refresh(); }
           catch (err) { setStatus(err instanceof Error ? err.message : 'Save failed.'); }
         }}>
-          {rows.map(row => <label key={String(row['key'])}>{String(row['key']).replaceAll('_', ' ')}<textarea name={String(row['key'])} defaultValue={String(row['value'] ?? '')} rows={String(row['value'] ?? '').length > 120 || String(row['value'] ?? '').includes('\n') ? 4 : 1} /></label>)}
-          <MediaUpload module="settings" accept="video/mp4,video/webm" label="Upload hero video" onUploaded={url => { const input = document.querySelector<HTMLTextAreaElement>('textarea[name=hero_video]'); if (input) input.value = url; }} />
+          <h2>Website settings</h2>
+          {rows.filter(row => !/^(hero_|home_order|(?:devotion|plan|prayer|word)_(?:image_url|label|verse_text|verse_ref|cta))/.test(String(row['key'])) && !String(row['key']).endsWith('_order')).map(row => <label key={String(row['key'])}>{String(row['key']).replaceAll('_', ' ')}<textarea name={String(row['key'])} defaultValue={String(row['value'] ?? '')} rows={String(row['value'] ?? '').length > 120 || String(row['value'] ?? '').includes('\n') ? 4 : 1} /></label>)}
           <Button type="submit"><Save />Save settings</Button>
         </form>
       ) : (
         <>
           <div className="admin-heading"><h2>{title}</h2>{canAdd && <Button onClick={() => setEditing({})}><Plus />Add</Button>}</div>
-          <div className="admin-list">
-            {rows.length ? rows.map(row => (
-              <article key={String(row['id'])}>
+          <StudioSort ids={displayRows.map(row => String(row['id']))} onOrder={ids => { if (isModule(module)) void reorder(ids); }}>
+          <div className="admin-list studio-card-list">
+            {displayRows.length ? displayRows.map((row, index) => (
+              <StudioSortableItem key={String(row['id'])} id={String(row['id'])} first={index === 0 || !isModule(module)} last={index === displayRows.length - 1 || !isModule(module)} move={step => { const ids = displayRows.map(item => String(item['id'])); const id = ids[index]; const other = ids[index + step]; if (!id || !other || !isModule(module)) return; ids[index] = other; ids[index + step] = id; void reorder(ids); }}>
+                {(row['cover_image_url'] || row['image_url']) && <img className="studio-card-cover" src={String(row['cover_image_url'] || row['image_url'])} alt="" loading="lazy" />}
                 <div>
                   <strong>{row['title'] ?? row['name'] ?? row['type'] ?? row['id']}</strong>
                   <p className="status">{module === 'events' ? [row['event_date'], row['time'], row['location']].filter(Boolean).join(' · ') : module === 'prayer_requests' ? `${Number(row['is_published']) === 1 ? 'Published' : 'Waiting to be published'} — ${row['request']}` : row['email'] ?? row['code'] ?? row['description'] ?? row['request'] ?? row['highlighted_text']}</p>
@@ -148,16 +161,15 @@ export function AdminPanel({ settings = false }: { settings?: boolean }) {
                     }}><Trash2 size={16} /></Button>
                   </div>
                 )}
-              </article>
+              </StudioSortableItem>
             )) : <p className="status">No records yet.</p>}
           </div>
+          </StudioSort>
         </>
       )}
 
-      <Dialog open={editing !== null} onOpenChange={open => { if (!open) setEditing(null); }}>
-        <DialogContent className="cms-dialog">
-          <DialogTitle>{editing?.['id'] ? 'Edit' : 'Add'} {module === 'admins' ? 'administrator' : isModule(module) ? modules[module].label : 'item'}</DialogTitle>
-          <DialogDescription className="sr-only">Fill in the details and save.</DialogDescription>
+      {editing && <section className="studio-item-editor cms-dialog">
+          <div className="admin-heading"><h2>{editing?.['id'] ? 'Edit' : 'Add'} {module === 'admins' ? 'administrator' : isModule(module) ? modules[module].label : 'item'}</h2><Button variant="outline" onClick={() => setEditing(null)}>Cancel</Button></div>
           {editing && (
             <form className="cms-form" onSubmit={submitItem}>
               {module === 'admins' ? (
@@ -181,7 +193,7 @@ export function AdminPanel({ settings = false }: { settings?: boolean }) {
                   <div className="upload-row">
                     {uploadsFor(module).map(u => (
                       <MediaUpload key={u.label} module={module} accept={u.accept} label={u.label}
-                        prepare={u.prepare ? file => u.prepare!(file, document.querySelector<HTMLFormElement>('.cms-dialog form')) : undefined}
+                        prepare={u.prepare ? file => { const prepare = u.prepare; return prepare ? prepare(file, document.querySelector<HTMLFormElement>('.studio-item-editor form')) : Promise.resolve(file); } : undefined}
                         onUploaded={(url, file) => { const name = u.target(file); const input = field(document.querySelector<HTMLFormElement>('.cms-dialog form'), name); if (input) input.value = url; }} />
                     ))}
                   </div>
@@ -190,8 +202,7 @@ export function AdminPanel({ settings = false }: { settings?: boolean }) {
               <Button type="submit"><Save />Save</Button>
             </form>
           )}
-        </DialogContent>
-      </Dialog>
+      </section>}
 
       {editingText && <BibleEditor row={editingText} onClose={() => setEditingText(null)} onSaved={async () => { setEditingText(null); await refresh(); setStatus('Bible text updated.'); }} />}
     </main>
