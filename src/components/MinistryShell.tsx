@@ -89,7 +89,7 @@ export function MinistryShell({ children }: { children: ReactNode }) {
               <div className="profile-avatar"><UserRound size={30} /></div>
               <SheetTitle className="mt-5">{user?.name ?? 'Welcome to BMI'}</SheetTitle>
               <SheetDescription className="mt-2 break-all">{user?.email ?? name}</SheetDescription>
-              {!user && <Button className="mt-5" onClick={() => setJoining(true)}>Sign in or join <ArrowRight /></Button>}
+               {!user && <SheetClose asChild><Button className="mt-5 account-entry" onClick={() => setJoining(true)}>Sign In / Create Account <ArrowRight /></Button></SheetClose>}
               <nav className="drawer-nav">
                 <SheetClose asChild><Link to="/"><Home size={18} />Home</Link></SheetClose>
                 {ministryLinks.map(item => <SheetClose asChild key={item.to}><Link to={item.to}><item.icon size={18} />{item.label}</Link></SheetClose>)}
@@ -107,10 +107,6 @@ export function MinistryShell({ children }: { children: ReactNode }) {
             <Link to="/events" activeProps={{ className: 'active' }}>Events</Link>
             <Link to="/partnership" activeProps={{ className: 'active' }}>Partnership</Link>
           </nav>
-          {user?.kind === 'admin'
-            ? <Button className="header-join" size="sm" asChild><Link to="/admin">Studio</Link></Button>
-            : user ? <Button className="header-join" size="sm" asChild><Link to="/bible">My Bible</Link></Button>
-            : <Button className="header-join" size="sm" onClick={() => setJoining(true)}>Join us <ArrowRight /></Button>}
         </div>
       </header>
       <div className="site-main">{children}</div>
@@ -131,7 +127,7 @@ export function MinistryShell({ children }: { children: ReactNode }) {
       </footer>
       <Dialog open={joining} onOpenChange={setJoining}>
         <DialogContent className="signup-dialog">
-          <DialogTitle>Join the BMI family</DialogTitle>
+           <DialogTitle>Sign In / Create Account</DialogTitle>
           <DialogDescription>{name}</DialogDescription>
           <MemberAuth onDone={() => setJoining(false)} />
         </DialogContent>

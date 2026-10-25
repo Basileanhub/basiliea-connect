@@ -14,8 +14,8 @@ export function isModule(value:string):value is Module { return Object.hasOwn(mo
 export function allowed(role:string, permissions:string[], module:string) {return role==='super_admin'||permissions.includes(module);}
 export function canManageAdmins(role:string) {return role==='super_admin';}
 export const defaultPreacher='Apostle Gabriel Idogbe';
-/** Only signed-in members (not visitors, not admins acting as admins) may send prayer requests. */
-export function canSubmitPrayer(identity:{kind:string}|null|undefined){return identity?.kind==='user';}
+/** Administrators retain the ordinary member capabilities. */
+export function canSubmitPrayer(identity:{kind:string}|null|undefined){return identity?.kind==='user'||identity?.kind==='admin';}
 /** Visitors only ever see requests an administrator has published. */
 export function visiblePrayers<T extends Row>(rows:T[]){return rows.filter(r=>Number(r['is_published'])===1);}
 export const highlightColors=['yellow','green','blue','pink','purple'] as const;

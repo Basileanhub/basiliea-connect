@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useServerFn } from '@tanstack/react-start';
 import { useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from '@tanstack/react-router';
+import { signInDestination } from '@/lib/visual-order';
 import { Button } from './ui/button';
 import { GoogleSignIn } from './GoogleSignIn';
 import { memberSignIn, memberSignUp, memberVerify, memberResendCode } from '@/lib/auth.functions';
@@ -18,8 +20,9 @@ export function MemberAuth({ onDone, intro }: { onDone?: (() => void) | undefine
   const verify = useServerFn(memberVerify);
   const resend = useServerFn(memberResendCode);
   const qc = useQueryClient();
+  const navigate = useNavigate();
 
-  async function finish() { await qc.invalidateQueries({ queryKey: ['identity'] }); onDone?.(); }
+  async function finish() { await qc.invalidateQueries({ queryKey: ['identity'] }); onDone?.(); await navigate({ to: signInDestination }); }
   async function run(task: () => Promise<{ ok: boolean; needsCode: boolean; error: string }>, codeMessage: string) {
     setBusy(true); setStatus('');
     try {
@@ -36,8 +39,8 @@ export function MemberAuth({ onDone, intro }: { onDone?: (() => void) | undefine
       {intro && <p className="status">{intro}</p>}
       {mode !== 'code' && (
         <div className="auth-switch" role="tablist">
-          <button type="button" role="tab" aria-selected={mode === 'signin'} className={mode === 'signin' ? 'active' : ''} onClick={() => { setMode('signin'); setStatus(''); }}>Sign in</button>
-          <button type="button" role="tab" aria-selected={mode === 'signup'} className={mode === 'signup' ? 'active' : ''} onClick={() => { setMode('signup'); setStatus(''); }}>Create account</button>
+          <Button type="button" role="tab" aria-selected={mode === 'signin'} variant={mode === 'signin' ? 'default' : 'ghost'} onClick={() => { setMode('signin'); setStatus(''); }}>Sign In</Button>
+          <Button type="button" role="tab" aria-selected={mode === 'signup'} variant={mode === 'signup' ? 'default' : 'ghost'} onClick={() => { setMode('signup'); setStatus(''); }}>Create Account</Button>
         </div>
       )}
       {mode === 'code' ? (
