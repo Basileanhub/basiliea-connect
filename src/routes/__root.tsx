@@ -13,6 +13,7 @@ import { useEffect, type ReactNode } from "react";
 import { MinistryShell } from "@/components/MinistryShell";
 import { registerOfflineApp } from "@/lib/pwa";
 import { contentOptions } from "@/lib/content-query";
+import { cachePublishedBibles } from '@/lib/bible-cache';
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
@@ -127,6 +128,7 @@ function RootComponent() {
   // Seed the browser cache with the server's copy so the first render matches the server.
   if (content && !queryClient.getQueryData(contentOptions.queryKey)) queryClient.setQueryData(contentOptions.queryKey, content);
   useEffect(() => { void registerOfflineApp().catch(console.error); }, []);
+  useEffect(() => { if (content) void cachePublishedBibles(content.bibles).catch(() => { /* Retry on the next site visit when online. */ }); }, [content]);
 
   return (
     <QueryClientProvider client={queryClient}>

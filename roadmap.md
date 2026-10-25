@@ -1,4 +1,10 @@
 # Ministry website
+- [ ] Current build: replace uploaded hero video, overlay welcome text, image-backed verse blocks and moderate spacing.
+- [ ] Remove header Join us; fitted account switch; Home sign-in redirects; admins retain member capabilities.
+- [ ] Studio-only visual editing, drag/drop media and persisted ordering; verify real admin save/read flow.
+- [ ] Automatic Bible text caching on first site visit, remove manual Bible download controls.
+- [ ] Telegram Word/channel and Live page integration using supported embeds, honest join-live fallback.
+- [ ] Verify Cloudflare tables/storage, tests, build signals and phone/tablet/desktop flows.
 - [x] Build white/deep-red public pages, cinematic welcome and mission, real giving details.
 - [x] Provide KJV/NIV reading and downloads.
 - [x] Add phone-install metadata and offline app-shell support.

@@ -9,7 +9,7 @@ import { chapterHighlights, removeHighlight, saveHighlight } from '@/lib/cms.fun
 import { highlightColors, type HighlightColor } from '@/lib/cms-model';
 import type { BibleData } from '@/lib/bible-text';
 import { MemberAuth } from './MemberAuth';
-import { DOWNLOAD_CACHE, DownloadButton, useDownload } from './OfflineDownload';
+import { BIBLE_CACHE } from '@/lib/bible-cache';
 
 const loaded = new Map<string, Promise<BibleData>>();
 /** Opens a Bible's text, using the copy saved on this device when there is one. */
@@ -17,7 +17,7 @@ function loadBible(url: string) {
   let pending = loaded.get(url);
   if (!pending) {
     pending = (async () => {
-      const saved = typeof caches !== 'undefined' ? await caches.open(DOWNLOAD_CACHE).then(c => c.match(url)).catch(() => undefined) : undefined;
+      const saved = typeof caches !== 'undefined' ? await caches.open(BIBLE_CACHE).then(c => c.match(url)).catch(() => undefined) : undefined;
       const response = saved ?? await fetch(url);
       if (!response.ok) throw new Error('Bible text unavailable');
       return await response.json() as BibleData;
@@ -43,7 +43,6 @@ export function BibleReader() {
   const [notice, setNotice] = useState('');
   const version = versions.find(v => String(v['code']) === code) ?? versions[0];
   const url = String(version?.['text_url'] ?? '');
-  const download = useDownload(url);
 
   useEffect(() => {
     try {
@@ -73,7 +72,7 @@ export function BibleReader() {
   const prefix = `${code}:${bookName}:${chapterIndex + 1}:`;
 
   const { data: user } = useQuery(identityOptions);
-  const member = user?.kind === 'user';
+  const member = !!user;
   const fetchMarks = useServerFn(chapterHighlights);
   const save = useServerFn(saveHighlight);
   const remove = useServerFn(removeHighlight);
@@ -165,9 +164,6 @@ export function BibleReader() {
           <div className="bible-footer-nav">
             <Button variant="outline" disabled={!hasPrev} onClick={prev}><ChevronLeft />Previous</Button>
             <Button variant="outline" disabled={!hasNext} onClick={next}>Next<ChevronRight /></Button>
-          </div>
-          <div className="bible-offline">
-            <DownloadButton download={download} label={`Download ${code} for offline reading`} />
           </div>
           {!member && <p className="status">Tap a verse to highlight it. Sign in to keep your highlights as bookmarks.</p>}
           {notice && <p role="status" className="status">{notice}</p>}

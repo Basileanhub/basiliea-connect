@@ -2,12 +2,13 @@ import { createServerFn } from '@tanstack/react-start';
 import { z } from 'zod';
 export const adminLogin=createServerFn({method:'POST'}).inputValidator(z.object({email:z.string().email(),password:z.string().min(1).max(128)})).handler(async({data})=>{
  const {query,sessionConfig}=await import('./cloudflare.server');const {compare,hash}=await import('bcryptjs');const {updateSession,setResponseHeader}=await import('@tanstack/react-start/server');setResponseHeader('Cache-Control','no-store');
- const rows=await query('SELECT id,email,password_hash,active FROM admins WHERE email=?',[data.email.trim().toLowerCase()]);const row=rows[0];
+ const rows=await query('SELECT id,name,email,password_hash,active FROM admins WHERE email=?',[data.email.trim().toLowerCase()]);const row=rows[0];
  let stored=typeof row?.['password_hash']==='string'?row['password_hash']:'';
  if(row&&!stored){const initial=row['email']==='olofinoflife@gmail.com'?process.env['BMI_INITIAL_ADMIN_PASSWORD']:row['email']==='basileiaministriesfinances@gmail.com'?process.env['BMI_FINANCE_ADMIN_PASSWORD']:undefined;if(initial){stored=await hash(initial,12);await query('UPDATE admins SET password_hash=?,password=\'\' WHERE id=? AND password_hash IS NULL',[stored,row['id']]);}}
  if(!stored)return {ok:false,error:'Administrator passwords have not been securely configured yet.'};
  if(!row||!row['active']||!await compare(data.password,stored))return {ok:false,error:'Email or password is incorrect.'};
- await updateSession(sessionConfig(),{adminId:Number(row['id']),userId:undefined});return {ok:true,error:''};
+ const {adminMember}=await import('./admin-member.server');const memberId=await adminMember(row);
+ await updateSession(sessionConfig(),{adminId:Number(row['id']),userId:memberId});return {ok:true,error:''};
 });
 export const signOut=createServerFn({method:'POST'}).handler(async()=>{const {sessionConfig}=await import('./cloudflare.server');const {clearSession}=await import('@tanstack/react-start/server');await clearSession(sessionConfig());return {ok:true};});
 type MemberResult={ok:boolean;needsCode:boolean;error:string};
@@ -24,6 +25,13 @@ export const memberSignUp=createServerFn({method:'POST'}).inputValidator(z.objec
 });
 export const memberSignIn=createServerFn({method:'POST'}).inputValidator(z.object({email:memberEmail,password:z.string().min(1).max(128)})).handler(async({data}):Promise<MemberResult>=>{
  const {query,sessionConfig}=await import('./cloudflare.server');const {compare}=await import('bcryptjs');const {updateSession,setResponseHeader}=await import('@tanstack/react-start/server');setResponseHeader('Cache-Control','no-store');
+ const admin=(await query('SELECT id,name,email,password_hash,active FROM admins WHERE email=?',[data.email]))[0];
+ if(admin&&Number(admin['active'])===1){
+  const hash=typeof admin['password_hash']==='string'?admin['password_hash']:'';
+  if(!hash||!await compare(data.password,hash))return {ok:false,needsCode:false,error:'Email or password is incorrect.'};
+  const {adminMember}=await import('./admin-member.server');const memberId=await adminMember(admin);
+  await updateSession(sessionConfig(),{adminId:Number(admin['id']),userId:memberId});return {ok:true,needsCode:false,error:''};
+ }
  const row=(await query('SELECT id,name,email,password_hash,email_verified FROM users WHERE email=?',[data.email]))[0];
  const stored=typeof row?.['password_hash']==='string'?row['password_hash']:'';
  if(!row||!stored||!await compare(data.password,stored))return {ok:false,needsCode:false,error:'Email or password is incorrect.'};

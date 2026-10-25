@@ -8,7 +8,12 @@ import { contentOptions } from '@/lib/content-query';
 import { formatDate, upcomingPrograms, ymd, type ProgramDay } from '@/lib/events-calendar';
 import type { Row } from '@/lib/cms-model';
 import worship from '@/assets/worship.jpg';
-import welcome from '@/assets/bmi-welcome.mp4.asset.json';
+import welcome from '@/assets/bmi-hero-october.mp4.asset.json';
+import devotionCover from '@/assets/devotion-cover.jpg';
+import readingCover from '@/assets/reading-cover.jpg';
+import prayerCover from '@/assets/prayer-cover.jpg';
+import wordCover from '@/assets/word-cover.jpg';
+import { orderedHome } from '@/lib/visual-order';
 
 export const Route = createFileRoute('/')({
   head: () => pageMeta('Welcome home', 'Welcome to Basileia Ministries International. The gospel of the Kingdom from the church to the world.'),
@@ -25,23 +30,23 @@ function Home() {
   useEffect(() => { const v = video.current; if (v) { v.muted = true; void v.play().catch(() => setPaused(true)); } }, [videoSrc]);
 
   const blocks = [
-    { key: 'devotion', to: '/devotion', icon: NotebookPen, latest: data.devotions[0]?.['title'] },
-    { key: 'plan', to: '/reading-plan', icon: BookOpenCheck, latest: data.reading_plans[0]?.['title'] },
-    { key: 'prayer', to: '/prayer', icon: HeartHandshake, latest: null },
-    { key: 'word', to: '/sermons', icon: Headphones, latest: data.sermons[0]?.['title'] },
+    { key: 'devotion', to: '/devotion', icon: NotebookPen, image: devotionCover, latest: data.devotions[0]?.['title'] },
+    { key: 'plan', to: '/reading-plan', icon: BookOpenCheck, image: readingCover, latest: data.reading_plans[0]?.['title'] },
+    { key: 'prayer', to: '/prayer', icon: HeartHandshake, image: prayerCover, latest: null },
+    { key: 'word', to: '/sermons', icon: Headphones, image: wordCover, latest: data.sermons[0]?.['title'] },
   ] as const;
 
   return (
     <main>
       <section className="hero">
         <div className="container-main hero-layout">
-          <div className="hero-content">
-            <div className="eyebrow">{s['hero_tagline']}</div>
-            <h1>{s['hero_title']}</h1>
-            {s['hero_description'] && <p className="hero-description">{s['hero_description']}</p>}
-          </div>
           <div className="hero-frame">
             <video ref={video} className="hero-video" src={videoSrc} poster={worship} autoPlay muted loop playsInline preload="metadata" aria-hidden="true" />
+            <div className="hero-content">
+              <div className="eyebrow">{s['hero_tagline']}</div>
+              <h1>{s['hero_title']}</h1>
+              {s['hero_description'] && <p className="hero-description">{s['hero_description']}</p>}
+            </div>
             <div className="hero-controls">
           <Button variant="hero" size="icon" aria-label={paused ? 'Play welcome video' : 'Pause welcome video'} onClick={() => { const v = video.current; if (!v) return; if (paused) void v.play(); else v.pause(); setPaused(!paused); }}>
             {paused ? <Play /> : <Pause />}
@@ -56,8 +61,9 @@ function Home() {
       </section>
 
       <section className="verse-blocks container-main" aria-label="Ministry resources">
-        {blocks.map(b => (
+        {orderedHome(s['home_order']).flatMap(key => { const b = blocks.find(item => item.key === key); return b ? [b] : []; }).map(b => (
           <article key={b.key} className="verse-block">
+            <img className="verse-block-image" src={s[`${b.key}_image_url`] || b.image} alt="" loading="lazy" width={1024} height={768} />
             <div className="weekly-label"><b.icon size={18} />{s[`${b.key}_label`]}</div>
             {s[`${b.key}_verse_text`] && <blockquote>“{s[`${b.key}_verse_text`]}”</blockquote>}
             {s[`${b.key}_verse_ref`] && <cite>{s[`${b.key}_verse_ref`]}</cite>}

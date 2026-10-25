@@ -9,5 +9,5 @@ export const Route=createFileRoute('/api/public/google-callback')({server:{handl
  const info=await fetch('https://openidconnect.googleapis.com/v1/userinfo',{headers:{Authorization:`Bearer ${token.access_token}`}});if(!info.ok)return new Response('Google could not verify your account.',{status:400});
  const profile=await info.json() as {sub?:string;email?:string;email_verified?:boolean;name?:string};if(!profile.sub||!profile.email||profile.email_verified!==true)return new Response('A verified Google email is required.',{status:403});
  await query('INSERT INTO users(id,google_sub,email,name) VALUES (?,?,?,?) ON CONFLICT(google_sub) DO UPDATE SET email=excluded.email,name=excluded.name',[crypto.randomUUID(),profile.sub,profile.email.toLowerCase(),profile.name??profile.email]);const rows=await query('SELECT id FROM users WHERE google_sub=?',[profile.sub]);const user=rows[0];if(!user)return new Response('Account could not be saved.',{status:500});
- await updateSession(sessionConfig(),{userId:String(user['id']),adminId:undefined});return new Response(null,{status:302,headers:{Location:'/bookmarks','Cache-Control':'no-store'}});
+ await updateSession(sessionConfig(),{userId:String(user['id']),adminId:undefined});return new Response(null,{status:302,headers:{Location:'/','Cache-Control':'no-store'}});
 }}}});
