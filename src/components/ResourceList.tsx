@@ -3,12 +3,13 @@ import { contentOptions } from '@/lib/content-query';
 import { Button } from './ui/button';
 import { DownloadButton, useDownload, useOfflineSrc } from './OfflineDownload';
 import type { Row } from '@/lib/cms-model';
+import { orderedRows } from '@/lib/visual-order';
 
 type ListModule = 'devotions' | 'reading_plans' | 'sermons' | 'library';
 
 export function ResourceList({ module }: { module: ListModule }) {
   const { data } = useSuspenseQuery(contentOptions);
-  const rows: Row[] = data[module];
+  const rows: Row[] = orderedRows(data[module], data.settings[`${module}_order`]);
   return (
     <main>
       <section className="section">
