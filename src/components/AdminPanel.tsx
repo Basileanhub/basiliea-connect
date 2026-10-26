@@ -120,7 +120,7 @@ export function AdminPanel({ settings = false }: { settings?: boolean }) {
         <Button asChild variant="outline"><Link to={settings ? '/admin' : '/admin/settings'}><Settings />{settings ? 'Studio' : 'Settings'}</Link></Button>
       </div>
       <div className="admin-tabs">
-        {choices.filter(([key]) => allowed(user.role, user.permissions, key)).map(([key, label]) => <Button key={key} variant={module === key ? 'default' : 'outline'} onClick={() => { setModule(key); setStatus(''); }}>{label}</Button>)}
+        {choices.filter(([key]) => allowed(user.role, user.permissions, key)).map(([key, label]) => <Button key={key} variant={module === key ? 'default' : 'outline'} onClick={() => { setModule(key); setEditing(null); setEditingText(null); setStatus(''); }}>{label}</Button>)}
       </div>
       {error && <p role="alert">{error.message}</p>}
       {status && <p role="status" className="status">{status}</p>}
@@ -171,7 +171,7 @@ export function AdminPanel({ settings = false }: { settings?: boolean }) {
       {editing && <section className="studio-item-editor cms-dialog">
           <div className="admin-heading"><h2>{editing?.['id'] ? 'Edit' : 'Add'} {module === 'admins' ? 'administrator' : isModule(module) ? modules[module].label : 'item'}</h2><Button variant="outline" onClick={() => setEditing(null)}>Cancel</Button></div>
           {editing && (
-            <form className="cms-form" onSubmit={submitItem}>
+            <form key={`${module}-${String(editing['id'] ?? 'new')}`} className="cms-form" onSubmit={submitItem}>
               {module === 'admins' ? (
                 <>
                   <label>Name<input name="name" required defaultValue={String(editing['name'] ?? '')} /></label>
