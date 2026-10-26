@@ -4,6 +4,7 @@ import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { useServerFn } from '@tanstack/react-start';
 import { HeartHandshake } from 'lucide-react';
 import { submitPrayer } from '@/lib/cms.functions';
+import { canSubmitPrayer } from '@/lib/cms-model';
 import { contentOptions, identityOptions } from '@/lib/content-query';
 import { Button } from '@/components/ui/button';
 import { MemberNotice } from '@/components/MinistryShell';
@@ -29,7 +30,7 @@ function Prayer() {
         <div className="container-main prayer-layout">
           <div>
             <h1 className="page-heading">Prayer Wall</h1>
-            {isPending ? null : user?.kind === 'user' ? (
+            {isPending ? null : canSubmitPrayer(user) ? (
               <form className="form-panel prayer-form" onSubmit={async e => {
                 e.preventDefault(); setBusy(true); setStatus('');
                 try { await submit({ data: { text } }); setText(''); setStatus('Thank you. Your request has been received and will appear on the Prayer Wall once an administrator publishes it.'); }
@@ -42,8 +43,6 @@ function Prayer() {
                 <Button className="mt-4" type="submit" disabled={busy}>{busy ? 'Sending…' : 'Send prayer request'} <HeartHandshake /></Button>
                 {status && <p className="status" role="status">{status}</p>}
               </form>
-            ) : user?.kind === 'admin' ? (
-              <p className="status">You are signed in as an administrator. Publish members’ requests from the Prayer Wall tab in Studio.</p>
             ) : (
               <MemberNotice intro="Sign in or create a member account to send a prayer request." />
             )}

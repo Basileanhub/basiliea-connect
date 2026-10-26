@@ -1,4 +1,5 @@
 # Ministry website
+- [x] Oct 26: Fix current errors only; all 11 tests pass, admin sign-in/Prayer Wall/Studio forms/Bible upload read-back verified; pending redesign unchanged.
 - [ ] Current build: replace uploaded hero video, overlay welcome text, image-backed verse blocks and moderate spacing.
 - [ ] Remove header Join us; fitted account switch; Home sign-in redirects; admins retain member capabilities.
 - [ ] Studio-only visual editing, drag/drop media and persisted ordering; verify real admin save/read flow.
