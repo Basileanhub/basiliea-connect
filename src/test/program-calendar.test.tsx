@@ -11,7 +11,11 @@ describe('Monthly program calendar', () => {
     expect(days.filter(d => map.has(d))).toEqual(['2026-12-24', '2026-12-25', '2026-12-26']);
   });
   it('cells show Title • Time • Location', () => {
-    expect(cellSummary(toProgram(december[0]!)!)).toBe('Winter Lights Market • 5:00 PM • Town Square');
+    const row = december[0];
+    if (!row) throw new Error('Missing calendar fixture.');
+    const program = toProgram(row);
+    if (!program) throw new Error('Invalid calendar fixture.');
+    expect(cellSummary(program)).toBe('Winter Lights Market • 5:00 PM • Town Square');
   });
   it('weeks start on Monday (1 Dec 2026 is a Tuesday, so one blank cell)', () => {
     expect(monthCells(2026, 11).slice(0, 2)).toEqual([null, 1]);
@@ -19,9 +23,14 @@ describe('Monthly program calendar', () => {
 });
 
 describe('Prayer Wall', () => {
-  it('only signed-in members can send requests', () => {
+  it('signed-in members can send requests', () => {
     expect(canSubmitPrayer({ kind: 'user' })).toBe(true);
-    expect(canSubmitPrayer({ kind: 'admin' })).toBe(false);
+  });
+  it('administrators retain member prayer submission access', () => {
+    expect(canSubmitPrayer({ kind: 'admin' })).toBe(true);
+  });
+  it('visitors cannot send requests', () => {
     expect(canSubmitPrayer(null)).toBe(false);
+    expect(canSubmitPrayer(undefined)).toBe(false);
   });
 });
