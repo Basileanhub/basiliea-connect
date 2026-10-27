@@ -27,7 +27,6 @@ import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
 import { Route as ApiMediaUploadRouteImport } from './routes/api/media.upload'
-import { Route as ApiPublicGoogleCallbackRouteImport } from './routes/api/public/google-callback'
 import { Route as ApiMediaObjectSplatRouteImport } from './routes/api/media.object.$'
 
 const IndexRoute = IndexRouteImport.update({
@@ -120,11 +119,6 @@ const ApiMediaUploadRoute = ApiMediaUploadRouteImport.update({
   path: '/api/media/upload',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicGoogleCallbackRoute = ApiPublicGoogleCallbackRouteImport.update({
-  id: '/api/public/google-callback',
-  path: '/api/public/google-callback',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiMediaObjectSplatRoute = ApiMediaObjectSplatRouteImport.update({
   id: '/api/media/object/$',
   path: '/api/media/object/$',
@@ -150,7 +144,6 @@ export interface FileRoutesByFullPath {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/': typeof AdminIndexRoute
   '/api/media/upload': typeof ApiMediaUploadRoute
-  '/api/public/google-callback': typeof ApiPublicGoogleCallbackRoute
   '/api/media/object/$': typeof ApiMediaObjectSplatRoute
 }
 export interface FileRoutesByTo {
@@ -172,7 +165,6 @@ export interface FileRoutesByTo {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin': typeof AdminIndexRoute
   '/api/media/upload': typeof ApiMediaUploadRoute
-  '/api/public/google-callback': typeof ApiPublicGoogleCallbackRoute
   '/api/media/object/$': typeof ApiMediaObjectSplatRoute
 }
 export interface FileRoutesById {
@@ -195,7 +187,6 @@ export interface FileRoutesById {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/': typeof AdminIndexRoute
   '/api/media/upload': typeof ApiMediaUploadRoute
-  '/api/public/google-callback': typeof ApiPublicGoogleCallbackRoute
   '/api/media/object/$': typeof ApiMediaObjectSplatRoute
 }
 export interface FileRouteTypes {
@@ -219,7 +210,6 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/'
     | '/api/media/upload'
-    | '/api/public/google-callback'
     | '/api/media/object/$'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -241,7 +231,6 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin'
     | '/api/media/upload'
-    | '/api/public/google-callback'
     | '/api/media/object/$'
   id:
     | '__root__'
@@ -263,7 +252,6 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/'
     | '/api/media/upload'
-    | '/api/public/google-callback'
     | '/api/media/object/$'
   fileRoutesById: FileRoutesById
 }
@@ -286,7 +274,6 @@ export interface RootRouteChildren {
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminIndexRoute: typeof AdminIndexRoute
   ApiMediaUploadRoute: typeof ApiMediaUploadRoute
-  ApiPublicGoogleCallbackRoute: typeof ApiPublicGoogleCallbackRoute
   ApiMediaObjectSplatRoute: typeof ApiMediaObjectSplatRoute
 }
 
@@ -418,13 +405,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiMediaUploadRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/google-callback': {
-      id: '/api/public/google-callback'
-      path: '/api/public/google-callback'
-      fullPath: '/api/public/google-callback'
-      preLoaderRoute: typeof ApiPublicGoogleCallbackRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/media/object/$': {
       id: '/api/media/object/$'
       path: '/api/media/object/$'
@@ -454,7 +434,6 @@ const rootRouteChildren: RootRouteChildren = {
   AdminSettingsRoute: AdminSettingsRoute,
   AdminIndexRoute: AdminIndexRoute,
   ApiMediaUploadRoute: ApiMediaUploadRoute,
-  ApiPublicGoogleCallbackRoute: ApiPublicGoogleCallbackRoute,
   ApiMediaObjectSplatRoute: ApiMediaObjectSplatRoute,
 }
 export const routeTree = rootRouteImport
