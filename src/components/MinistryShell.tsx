@@ -65,7 +65,7 @@ export function AccountCopy({ settings }: { settings: Record<string, string> }) 
 }
 
 function Brand({ name }: { name: string }) {
-  return <Link to="/" className="brand"><img src={logo.url} width={48} height={48} alt="BMI logo" /><span className="brand-name">{name}</span></Link>;
+  return <Link to="/" className="brand"><img src={logo.url} width={48} height={48} alt="BMi logo" /><span className="brand-name">{name}</span></Link>;
 }
 
 export function MinistryShell({ children }: { children: ReactNode }) {
@@ -87,7 +87,7 @@ export function MinistryShell({ children }: { children: ReactNode }) {
             <SheetTrigger asChild><Button variant="ghost" size="icon" className="avatar-trigger" aria-label="Open profile and menu"><UserRound /></Button></SheetTrigger>
             <SheetContent side="left" className="drawer">
               <div className="profile-avatar"><UserRound size={30} /></div>
-              <SheetTitle className="mt-5">{user?.name ?? 'Welcome to BMI'}</SheetTitle>
+              <SheetTitle className="mt-5">{user?.name ?? 'Welcome to BMi'}</SheetTitle>
               <SheetDescription className="mt-2 break-all">{user?.email ?? name}</SheetDescription>
                {!user && <SheetClose asChild><Button className="mt-5 account-entry" onClick={() => setJoining(true)}>Sign In / Create Account <ArrowRight /></Button></SheetClose>}
               <nav className="drawer-nav">

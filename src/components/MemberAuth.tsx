@@ -4,7 +4,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { signInDestination } from '@/lib/visual-order';
 import { Button } from './ui/button';
-import { GoogleSignIn } from './GoogleSignIn';
 import { memberSignIn, memberSignUp, memberVerify, memberResendCode } from '@/lib/auth.functions';
 
 type Mode = 'signin' | 'signup' | 'code';
@@ -71,7 +70,6 @@ export function MemberAuth({ onDone, intro }: { onDone?: (() => void) | undefine
         </form>
       )}
       {status && <p role="status" className="auth-status">{status}</p>}
-      {mode !== 'code' && <><div className="auth-or"><span>or</span></div><GoogleSignIn /></>}
     </div>
   );
 }

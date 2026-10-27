@@ -147,3 +147,27 @@ img,video,iframe{max-width:100%;}
 .broadcast-heading{margin-bottom:28px;}.broadcast-heading>span{display:flex;gap:8px;align-items:center;color:var(--program);font-weight:700;font-size:12px;}.broadcast-heading h1{font-size:36px;margin-top:8px;}.broadcast-stage{background:var(--stage-surface);color:var(--hero-ink);border-radius:8px;overflow:hidden;}.broadcast-standby{min-height:420px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;text-align:center;padding:32px;}.broadcast-standby h2{font-size:28px;}.broadcast-modes{display:flex;gap:12px;align-items:center;font-size:14px;}.broadcast-caption{text-align:center;margin-top:20px;color:var(--muted-foreground);line-height:1.7;}
 @media(max-width:900px){.studio-section-media{width:170px;}.studio-hero-edit{grid-template-columns:180px 1fr;}.hero-content{padding:0 30px;}.hero h1{font-size:40px;}}
 @media(max-width:760px){.hero-frame{height:auto;min-height:0;aspect-ratio:9/16;}.hero-video{width:100%;height:100%;}.hero-content{bottom:50px;padding:0 20px;}.hero h1{font-size:30px;}.hero-description{font-size:14px;line-height:1.65;}.hero .eyebrow{font-size:10px;line-height:1.6;}.verse-block{padding:24px;min-height:340px;}.verse-blocks{gap:20px;}.studio-hero-edit{grid-template-columns:1fr;}.studio-hero-edit video{max-height:380px;}.studio-sort-item{flex-wrap:wrap;padding:16px;}.studio-sort-tools{flex-direction:row;width:100%;}.studio-section-media{width:100%;}.studio-section-media img{max-height:200px;}.studio-item-editor{padding:16px;}.studio-card-cover{width:100%;max-height:220px;}.telegram-feed{grid-template-columns:1fr;}.telegram-heading{flex-wrap:wrap;}.telegram-section,.broadcast-section{padding-top:32px;padding-bottom:32px;}.broadcast-standby{min-height:320px;}.brand-name{display:block;}.header-inner{justify-content:flex-start;}}
+
+/* Cinematic home */
+.cine-hero{position:relative;height:min(92vh,860px);min-height:520px;overflow:hidden;background:var(--foreground);color:var(--hero-ink);display:flex;align-items:center;justify-content:center;text-align:center}
+.cine-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;animation:cinema 26s ease-in-out infinite alternate}
+.cine-hero::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,oklch(.12 .012 28 / .35),oklch(.12 .012 28 / .7))}
+.cine-content{position:relative;z-index:1;padding:0 24px 80px;max-width:820px}
+.cine-content .eyebrow{justify-content:center}.cine-content .eyebrow::before{display:none}
+.cine-content h1{font-size:clamp(34px,6vw,64px);line-height:1.1;margin:20px 0}
+.cine-content .hero-description{margin:auto}
+.cine-play{position:absolute!important;right:24px;bottom:110px;z-index:2}
+.cine-float{position:relative;z-index:3;margin-top:-90px}
+.cine-float .events-slider{background:var(--background);color:var(--foreground);border-radius:16px;box-shadow:0 20px 60px oklch(.2 .01 30 / .18);padding:28px}
+.cine-calendar{padding:72px 48px 24px;display:grid;gap:20px}
+.grow-blocks{display:grid;gap:96px;padding:72px 48px 110px}
+.grow-block{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center}
+.grow-block.flip .grow-photo{order:2}
+.grow-photo img{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:220px 220px 16px 16px;display:block}
+.grow-block.flip .grow-photo img{border-radius:16px 220px 16px 220px}
+.grow-text blockquote{font-family:var(--font-display);font-size:clamp(22px,2.6vw,32px);line-height:1.4;margin:20px 0 12px}
+.grow-text cite{display:block;color:var(--primary);font-weight:700;font-style:normal;margin-bottom:20px}
+.reveal{opacity:0;transform:translateY(48px);transition:opacity .9s ease,transform .9s ease}
+.reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}.cine-video{animation:none}}
+@media (max-width:768px){.cine-calendar,.grow-blocks{padding-left:18px;padding-right:18px}.grow-block{grid-template-columns:1fr;gap:24px}.grow-block.flip .grow-photo{order:0}.grow-blocks{gap:64px}.cine-float{margin-top:-60px}.cine-float .events-slider{padding:20px}.cine-play{bottom:80px;right:14px}}

@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useSuspenseQuery } from '@tanstack/react-query';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { ArrowRight, Pause, Play, CalendarDays, MapPin, NotebookPen, BookOpenCheck, HeartHandshake, Headphones } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { pageMeta } from '@/lib/page-meta';
@@ -13,6 +13,7 @@ import devotionCover from '@/assets/devotion-cover.jpg';
 import readingCover from '@/assets/reading-cover.jpg';
 import prayerCover from '@/assets/prayer-cover.jpg';
 import wordCover from '@/assets/word-cover.jpg';
+import { ProgramCalendar } from '@/components/ProgramCalendar';
 import { orderedHome } from '@/lib/visual-order';
 
 export const Route = createFileRoute('/')({
@@ -37,43 +38,56 @@ function Home() {
   ] as const;
 
   return (
-    <main>
-      <section className="hero">
-        <div className="container-main hero-layout">
-          <div className="hero-frame">
-            <video ref={video} className="hero-video" src={videoSrc} poster={worship} autoPlay muted loop playsInline preload="metadata" aria-hidden="true" />
-            <div className="hero-content">
-              <div className="eyebrow">{s['hero_tagline']}</div>
-              <h1>{s['hero_title']}</h1>
-              {s['hero_description'] && <p className="hero-description">{s['hero_description']}</p>}
-            </div>
-            <div className="hero-controls">
-          <Button variant="hero" size="icon" aria-label={paused ? 'Play welcome video' : 'Pause welcome video'} onClick={() => { const v = video.current; if (!v) return; if (paused) void v.play(); else v.pause(); setPaused(!paused); }}>
-            {paused ? <Play /> : <Pause />}
-          </Button>
-            </div>
-          </div>
+    <main className="home-cinema">
+      <section className="cine-hero">
+        <video ref={video} className="cine-video" src={videoSrc} poster={worship} autoPlay muted loop playsInline preload="metadata" aria-hidden="true" />
+        <div className="cine-content">
+          <div className="eyebrow">{s['hero_tagline']}</div>
+          <h1>{s['hero_title']}</h1>
+          {s['hero_description'] && <p className="hero-description">{s['hero_description']}</p>}
         </div>
+        <Button variant="hero" size="icon" className="cine-play" aria-label={paused ? 'Play welcome video' : 'Pause welcome video'} onClick={() => { const v = video.current; if (!v) return; if (paused) void v.play(); else v.pause(); setPaused(!paused); }}>
+          {paused ? <Play /> : <Pause />}
+        </Button>
       </section>
 
-      <section className="weekly-section container-main">
+      <section className="cine-float container-main">
         <EventsSlider events={data.events} label={s['events_label'] ?? ''} cta={s['events_cta'] || 'View all events'} />
       </section>
 
-      <section className="verse-blocks container-main" aria-label="Ministry resources">
-        {orderedHome(s['home_order']).flatMap(key => { const b = blocks.find(item => item.key === key); return b ? [b] : []; }).map(b => (
-          <article key={b.key} className="verse-block">
-            <img className="verse-block-image" src={s[`${b.key}_image_url`] || b.image} alt="" loading="lazy" width={1024} height={768} />
-            <div className="weekly-label"><b.icon size={18} />{s[`${b.key}_label`]}</div>
-            {s[`${b.key}_verse_text`] && <blockquote>“{s[`${b.key}_verse_text`]}”</blockquote>}
-            {s[`${b.key}_verse_ref`] && <cite>{s[`${b.key}_verse_ref`]}</cite>}
-            {b.latest && <p className="verse-latest">Latest: {String(b.latest)}</p>}
-            <Link to={b.to} className="verse-cta">{s[`${b.key}_cta`] || 'Open'} <ArrowRight size={16} /></Link>
-          </article>
+      <Reveal className="cine-calendar container-main">
+        <div className="weekly-label"><CalendarDays size={18} />Program calendar</div>
+        <ProgramCalendar events={data.events} />
+        <Link to="/events" className="verse-cta">View full program calendar <ArrowRight size={16} /></Link>
+      </Reveal>
+
+      <section className="grow-blocks container-main" aria-label="Ministry resources">
+        {orderedHome(s['home_order']).flatMap(key => { const b = blocks.find(item => item.key === key); return b ? [b] : []; }).map((b, i) => (
+          <Reveal key={b.key} className={`grow-block${i % 2 ? ' flip' : ''}`}>
+            <div className="grow-photo"><img src={s[`${b.key}_image_url`] || b.image} alt="" loading="lazy" width={1024} height={768} /></div>
+            <div className="grow-text">
+              <div className="weekly-label"><b.icon size={18} />{s[`${b.key}_label`]}</div>
+              {s[`${b.key}_verse_text`] && <blockquote>“{s[`${b.key}_verse_text`]}”</blockquote>}
+              {s[`${b.key}_verse_ref`] && <cite>{s[`${b.key}_verse_ref`]}</cite>}
+              {b.latest && <p className="verse-latest">Latest: {String(b.latest)}</p>}
+              <Link to={b.to} className="verse-cta">{s[`${b.key}_cta`] || 'Open'} <ArrowRight size={16} /></Link>
+            </div>
+          </Reveal>
         ))}
       </section>
     </main>
   );
+}
+
+function Reveal({ className, children }: { className: string; children: ReactNode }) {
+  const ref = useRef<HTMLElement>(null);
+  const [shown, setShown] = useState(false);
+  useEffect(() => {
+    const el = ref.current; if (!el || typeof IntersectionObserver === 'undefined') { setShown(true); return; }
+    const io = new IntersectionObserver(([e]) => { if (e?.isIntersecting) { setShown(true); io.disconnect(); } }, { threshold: 0.15 });
+    io.observe(el); return () => io.disconnect();
+  }, []);
+  return <section ref={ref} className={`${className} reveal${shown ? ' in' : ''}`}>{children}</section>;
 }
 
 function EventsSlider({ events, label, cta }: { events: Row[]; label: string; cta: string }) {

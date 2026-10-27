@@ -15,7 +15,8 @@ export const publicContent=createServerFn({method:'GET'}).handler(async()=>{
   query('SELECT id,code,name,text_url,pdf_url FROM bibles WHERE is_published=1 ORDER BY sort_order,id'),
   query('SELECT id,request,is_answered,is_published,created_at FROM prayer_requests WHERE is_published=1 ORDER BY created_at DESC LIMIT 60'),
  ]);
- return {settings,devotions,sermons,events,library,reading_plans,broadcasts,bibles,prayers};
+ const brand=<T,>(v:T):T=>JSON.parse(JSON.stringify(v).replace(/\bBMI\b/g,"BMi"));
+ return brand({settings,devotions,sermons,events,library,reading_plans,broadcasts,bibles,prayers});
 });
 export const currentIdentity=createServerFn({method:'GET'}).handler(async()=>{const {identity}=await import('./cloudflare.server');return identity();});
 export const adminRows=createServerFn({method:'POST'}).inputValidator(z.object({module:z.string()})).handler(async({data})=>{
