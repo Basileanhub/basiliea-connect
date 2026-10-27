@@ -55,12 +55,6 @@ export const memberResendCode=createServerFn({method:'POST'}).inputValidator(z.o
  if(row&&Number(row['email_verified'])!==1){try{await issueCode(String(row['id']),data.email,String(row['name']));}catch(e){return {ok:false,needsCode:true,error:e instanceof Error?e.message:'We could not send your code.'};}}
  return {ok:true,needsCode:true,error:''};
 });
-export const startGoogle=createServerFn({method:'POST'}).handler(async()=>{
- const {setCookie,getRequestUrl}=await import('@tanstack/react-start/server');const client=process.env['GOOGLE_CLIENT_ID'];if(!client||!process.env['GOOGLE_CLIENT_SECRET'])return {url:'',error:'Google sign-in is awaiting ministry setup.'};
- const state=crypto.randomUUID();setCookie('bmi-oauth-state',state,{httpOnly:true,sameSite:'lax',secure:process.env['NODE_ENV']==='production',maxAge:600,path:'/'});
- const origin=new URL(getRequestUrl()).origin;const params=new URLSearchParams({client_id:client,redirect_uri:`${origin}/api/public/google-callback`,response_type:'code',scope:'openid email profile',state,prompt:'select_account'});
- return {url:`https://accounts.google.com/o/oauth2/v2/auth?${params}`,error:''};
-});
 export const saveAdmin=createServerFn({method:'POST'}).inputValidator(z.object({id:z.number().optional(),email:z.string().email(),name:z.string().min(1),password:z.string().min(12).max(128).optional(),role:z.enum(['super_admin','editor']),permissions:z.array(z.string()),active:z.boolean()})).handler(async({data})=>{
  const {query,requireAdmin}=await import('./cloudflare.server');const user=await requireAdmin();if(user.role!=='super_admin')throw new Error('Super administrator access required.');
  if(data.id===Number(user.id)&&(!data.active||data.role!=='super_admin'))throw new Error('You cannot remove your own super administrator access.');
