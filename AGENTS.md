@@ -13,4 +13,5 @@
 - Keep Cloudflare calls server-side through the linked connector gateway; D1 and authenticated features must remain unavailable until verified permissions and secure identity handling are configured.
 - Use uploaded Bible assets for document reading/downloads; never label the uploaded Bower book as an NLT translation.
 - Events are one row per program day (event_date); days without a row are free days, so admins control the calendar by adding only program days.
+- Reuse ProgramCalendar's compact variant for the Home overlap and its full month grid on Events, so both share program details while Home omits free dates.
 - Seed the browser query cache from the root route loader so server and browser render the same shared content.

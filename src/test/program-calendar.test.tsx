@@ -1,10 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { cellSummary, monthCells, programsByDay, toProgram } from '@/lib/events-calendar';
+import { cellSummary, monthCells, occupiedMonthDays, programsByDay, toProgram } from '@/lib/events-calendar';
 import { canSubmitPrayer } from '@/lib/cms-model';
 
 const december = [24, 25, 26].map(d => ({ id: d, title: 'Winter Lights Market', event_date: `2026-12-${d}`, time: '5:00 PM', location: 'Town Square' }));
 
 describe('Monthly program calendar', () => {
+  it('compact Home calendar includes only December 24, 25 and 26, excluding free days and other months', () => {
+    const map = programsByDay([...december, { id: 99, title: 'January program', event_date: '2027-01-01' }]);
+    expect(occupiedMonthDays(map, 2026, 11)).toEqual([24, 25, 26]);
+    expect(occupiedMonthDays(map, 2026, 10)).toEqual([]);
+  });
   it('only days with a program are program days; all others are free', () => {
     const map = programsByDay(december);
     const days = Array.from({ length: 31 }, (_, i) => `2026-12-${String(i + 1).padStart(2, '0')}`);

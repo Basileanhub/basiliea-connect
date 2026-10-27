@@ -26,6 +26,11 @@ export function monthCells(year: number, month: number): (number | null)[] {
   return [...Array.from({ length: lead }, () => null), ...Array.from({ length: daysIn(year, month) }, (_, i) => i + 1)];
 }
 
+/** Occupied dates only, in chronological order, for the compact Home calendar. */
+export function occupiedMonthDays(byDay: Map<string, ProgramDay[]>, year: number, month: number): number[] {
+  return monthCells(year, month).filter((day): day is number => day !== null && byDay.has(ymd(year, month, day)));
+}
+
 /** Programs from today onwards, soonest first. */
 export function upcomingPrograms(rows: Row[], todayKey: string, limit = 8): ProgramDay[] {
   return rows.map(toProgram).filter((p): p is ProgramDay => !!p && p.date >= todayKey).sort((a, b) => a.date.localeCompare(b.date)).slice(0, limit);
