@@ -1,5 +1,5 @@
 # Ministry website
-- [ ] Oct 27: Compact program-only calendar in the Home overlapping panel; smaller alternating slide-in resource photos/text and logo-coloured page buttons; verify phone/tablet/desktop.
+- [x] Oct 27: Compact program-only calendar in the Home overlapping panel; smaller alternating slide-in resource photos/text and logo-coloured page buttons; verified phone/tablet/desktop and program popups; 7 calendar tests pass.
 - [x] Oct 26: Fix current errors only; all 11 tests pass, admin sign-in/Prayer Wall/Studio forms/Bible upload read-back verified; pending redesign unchanged.
 - [ ] Current build: replace uploaded hero video, overlay welcome text, image-backed verse blocks and moderate spacing.
 - [ ] Remove header Join us; fitted account switch; Home sign-in redirects; admins retain member capabilities.
