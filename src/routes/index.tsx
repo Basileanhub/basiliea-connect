@@ -59,16 +59,15 @@ function Home() {
 
       <section className="grow-blocks container-main" aria-label="Ministry resources">
         {orderedHome(s['home_order']).flatMap(key => { const b = blocks.find(item => item.key === key); return b ? [b] : []; }).map((b, i) => (
-          <Reveal key={b.key} className={`grow-block${i % 2 ? ' flip' : ''}`}>
+          <section key={b.key} className={`grow-block${i % 2 ? ' flip' : ''}`}>
             <div className="grow-photo"><img src={s[`${b.key}_image_url`] || b.image} alt="" loading="lazy" width={1024} height={768} /></div>
             <div className="grow-text">
-              <div className="weekly-label"><b.icon size={18} />{s[`${b.key}_label`]}</div>
               {s[`${b.key}_verse_text`] && <blockquote>“{s[`${b.key}_verse_text`]}”</blockquote>}
               {s[`${b.key}_verse_ref`] && <cite>{s[`${b.key}_verse_ref`]}</cite>}
               {b.latest && <p className="verse-latest">Latest: {String(b.latest)}</p>}
               <Button asChild className="grow-cta"><Link to={b.to}>{s[`${b.key}_cta`] || 'Open'} <ArrowRight size={16} /></Link></Button>
             </div>
-          </Reveal>
+          </section>
         ))}
       </section>
     </main>

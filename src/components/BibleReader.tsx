@@ -165,7 +165,6 @@ export function BibleReader() {
             <Button variant="outline" disabled={!hasPrev} onClick={prev}><ChevronLeft />Previous</Button>
             <Button variant="outline" disabled={!hasNext} onClick={next}>Next<ChevronRight /></Button>
           </div>
-          {!member && <p className="status">Tap a verse to highlight it. Sign in to keep your highlights as bookmarks.</p>}
           {notice && <p role="status" className="status">{notice}</p>}
         </article>
       )}
