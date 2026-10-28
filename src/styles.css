@@ -77,8 +77,11 @@ img,video,iframe{max-width:100%;}
 /* Bible */
 .bible-section{padding:0 0 40px;}
 .bible-nav{position:sticky;top:0;z-index:20;background:var(--background);border-bottom:1px solid var(--border);display:flex;gap:6px;align-items:center;padding:10px 0;}
-.bible-nav select{border:1px solid var(--border);border-radius:6px;padding:8px;background:var(--background);color:var(--foreground);min-width:0;font-size:14px;}
-.bible-nav select[aria-label=Book]{flex:1;max-width:260px;}.version-select{font-weight:700;color:var(--primary)!important;}
+.bible-nav select{border:1px solid var(--primary);border-radius:8px;padding:8px;background:var(--primary);color:var(--primary-foreground);min-width:0;font-size:14px;font-weight:600;}
+.bible-nav select option{background:var(--background);color:var(--foreground);}
+.bible-nav .btn,.bible-nav button{background:var(--primary);color:var(--primary-foreground);border-radius:8px;}
+.bible-nav .btn:disabled,.bible-nav button:disabled{opacity:.45;}
+.bible-nav select[aria-label=Book]{flex:1;max-width:260px;}.version-select{font-weight:700;}
 .bible-text{max-width:720px;margin:0 auto;padding:24px 0 120px;}.bible-text h1{font-size:clamp(24px,4vw,32px);text-align:center;margin:4px 0 20px;}
 .bible-version-name{text-align:center;color:var(--muted-foreground);font-size:13px;}
 .bible-text>p:not(.status):not(.bible-version-name){font-size:clamp(17px,2.2vw,19px);line-height:2;}
@@ -160,27 +163,17 @@ img,video,iframe{max-width:100%;}
 .cine-float{position:relative;z-index:3;margin-top:-90px}
 .cine-float .events-slider{background:var(--background);color:var(--foreground);border-radius:16px;box-shadow:0 20px 60px oklch(.2 .01 30 / .18);padding:28px}
 .cine-calendar{padding:72px 48px 24px;display:grid;gap:20px}
-.grow-blocks{display:grid;gap:96px;padding:72px 48px 110px}
-.grow-block{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);gap:48px;align-items:center;overflow:hidden}
-.grow-block .grow-photo{order:2;justify-self:end;max-width:340px;width:100%}
+.grow-blocks{display:grid;gap:64px;padding:72px 48px 110px}
+.grow-block{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);gap:40px;align-items:center;background:color-mix(in oklch,var(--primary) 8%,var(--background));border:1px solid color-mix(in oklch,var(--primary) 18%,var(--border));border-radius:24px;padding:40px;box-shadow:0 12px 32px color-mix(in oklch,var(--primary) 10%,transparent)}
+.grow-block .grow-photo{order:2;justify-self:end;max-width:300px;width:100%}
 .grow-block .grow-text{order:1;min-width:0}
 .grow-block.flip{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr)}
 .grow-block.flip .grow-photo{order:1;justify-self:start}
 .grow-block.flip .grow-text{order:2}
-.grow-photo img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:160px 160px 8px 8px;display:block}
-.grow-block.flip .grow-photo img{border-radius:16px 220px 16px 220px}
-.grow-text blockquote{font-family:var(--font-display);font-size:clamp(22px,2.6vw,32px);line-height:1.4;margin:20px 0 12px}
+.grow-photo img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:16px;display:block}
+.grow-text blockquote{font-family:var(--font-display);font-size:clamp(22px,2.6vw,32px);line-height:1.4;margin:0 0 12px}
 .grow-text cite{display:block;color:var(--primary);font-weight:700;font-style:normal;margin-bottom:20px}
-.reveal{opacity:0;transform:translateY(48px);transition:opacity .9s ease,transform .9s ease}
-.reveal.in{opacity:1;transform:none}
-.grow-block.reveal{opacity:1;transform:none}
-.grow-block .grow-photo,.grow-block .grow-text{opacity:0;transition:opacity .8s ease,transform .9s cubic-bezier(.2,.7,.2,1)}
-.grow-block .grow-photo{transform:translateX(64px)}
-.grow-block .grow-text{transform:translateX(-64px)}
-.grow-block.flip .grow-photo{transform:translateX(-64px)}
-.grow-block.flip .grow-text{transform:translateX(64px)}
-.grow-block.in .grow-photo,.grow-block.in .grow-text{opacity:1;transform:none}
-.grow-cta{height:auto;min-height:44px;white-space:normal;text-align:center;margin-top:8px;max-width:100%}
+.grow-cta{height:auto;min-height:44px;white-space:normal;text-align:center;margin-top:8px;max-width:100%;display:block;width:100%}
 .home-program-panel{background:var(--background);border-radius:8px;box-shadow:var(--shadow-soft);padding:22px;display:grid;gap:16px}
 .calendar-compact{padding:0;border:0;border-radius:0}
 .calendar-compact .calendar-head{margin-bottom:14px}
