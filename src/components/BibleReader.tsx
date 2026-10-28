@@ -124,14 +124,14 @@ export function BibleReader() {
         <select aria-label="Bible version" className="version-select" value={code} onChange={e => { setCode(e.target.value); setSelected(null); }}>
           {versions.map(v => <option key={String(v['id'])} value={String(v['code'])}>{String(v['code'])}</option>)}
         </select>
-        <Button variant="ghost" size="icon" aria-label="Previous chapter" disabled={!bible || !hasPrev} onClick={prev}><ChevronLeft /></Button>
+        <Button size="icon" aria-label="Previous chapter" disabled={!bible || !hasPrev} onClick={prev}><ChevronLeft /></Button>
         <select aria-label="Book" value={bookIndex} disabled={!bible} onChange={e => go(Number(e.target.value), 0)}>
           {books.map((b, i) => <option key={b.name} value={i}>{b.name}</option>)}
         </select>
         <select aria-label="Chapter" value={chapterIndex} disabled={!bible} onChange={e => go(bookIndex, Number(e.target.value))}>
           {(current?.chapters ?? []).map((_, i) => <option key={i} value={i}>{i + 1}</option>)}
         </select>
-        <Button variant="ghost" size="icon" aria-label="Next chapter" disabled={!bible || !hasNext} onClick={next}><ChevronRight /></Button>
+        <Button size="icon" aria-label="Next chapter" disabled={!bible || !hasNext} onClick={next}><ChevronRight /></Button>
       </nav>
 
       {error && <p role="alert" className="status">{error}</p>}
