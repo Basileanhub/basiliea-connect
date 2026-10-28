@@ -164,16 +164,13 @@ img,video,iframe{max-width:100%;}
 .cine-float .events-slider{background:var(--background);color:var(--foreground);border-radius:16px;box-shadow:0 20px 60px oklch(.2 .01 30 / .18);padding:28px}
 .cine-calendar{padding:72px 48px 24px;display:grid;gap:20px}
 .grow-blocks{display:grid;gap:64px;padding:72px 48px 110px}
-.grow-block{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);gap:40px;align-items:center;background:color-mix(in oklch,var(--primary) 8%,var(--background));border:1px solid color-mix(in oklch,var(--primary) 18%,var(--border));border-radius:24px;padding:40px;box-shadow:0 12px 32px color-mix(in oklch,var(--primary) 10%,transparent)}
-.grow-block .grow-photo{order:2;justify-self:end;max-width:300px;width:100%}
-.grow-block .grow-text{order:1;min-width:0}
-.grow-block.flip{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr)}
-.grow-block.flip .grow-photo{order:1;justify-self:start}
-.grow-block.flip .grow-text{order:2}
+.grow-block{display:block;background:color-mix(in oklch,var(--primary) 8%,var(--background));border:1px solid color-mix(in oklch,var(--primary) 18%,var(--border));border-radius:24px;padding:40px;box-shadow:0 12px 32px color-mix(in oklch,var(--primary) 10%,transparent);overflow:hidden}
+.grow-block .grow-photo{float:right;max-width:300px;width:38%;margin:0 0 20px 32px}
+.grow-block.flip .grow-photo{float:left;margin:0 32px 20px 0}
 .grow-photo img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:16px;display:block}
-.grow-text blockquote{font-family:var(--font-display);font-size:clamp(22px,2.6vw,32px);line-height:1.4;margin:0 0 12px}
-.grow-text cite{display:block;color:var(--primary);font-weight:700;font-style:normal;margin-bottom:20px}
-.grow-cta{height:auto;min-height:44px;white-space:normal;text-align:center;margin-top:8px;max-width:100%;display:block;width:100%}
+.grow-block blockquote{font-family:var(--font-display);font-size:clamp(22px,2.6vw,32px);line-height:1.4;margin:0 0 12px}
+.grow-block cite{display:block;color:var(--primary);font-weight:700;font-style:normal;margin-bottom:16px}
+.grow-cta{height:auto;min-height:44px;white-space:normal;text-align:center;margin-top:12px;width:auto;display:inline-flex;padding-left:28px;padding-right:28px;clear:both}
 .home-program-panel{background:var(--background);border-radius:8px;box-shadow:var(--shadow-soft);padding:22px;display:grid;gap:16px}
 .calendar-compact{padding:0;border:0;border-radius:0}
 .calendar-compact .calendar-head{margin-bottom:14px}
