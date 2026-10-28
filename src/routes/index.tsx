@@ -74,14 +74,4 @@ function Home() {
   );
 }
 
-function Reveal({ className, children }: { className: string; children: ReactNode }) {
-  const ref = useRef<HTMLElement>(null);
-  const [shown, setShown] = useState(false);
-  useEffect(() => {
-    const el = ref.current; if (!el || typeof IntersectionObserver === 'undefined') { setShown(true); return; }
-    const io = new IntersectionObserver(([e]) => { if (e?.isIntersecting) { setShown(true); io.disconnect(); } }, { threshold: 0.15 });
-    io.observe(el); return () => io.disconnect();
-  }, []);
-  return <section ref={ref} className={`${className} reveal${shown ? ' in' : ''}`}>{children}</section>;
-}
 
