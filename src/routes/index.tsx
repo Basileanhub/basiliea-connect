@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useSuspenseQuery } from '@tanstack/react-query';
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ArrowRight, Pause, Play, CalendarDays, NotebookPen, BookOpenCheck, HeartHandshake, Headphones } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { pageMeta } from '@/lib/page-meta';
@@ -59,30 +59,19 @@ function Home() {
 
       <section className="grow-blocks container-main" aria-label="Ministry resources">
         {orderedHome(s['home_order']).flatMap(key => { const b = blocks.find(item => item.key === key); return b ? [b] : []; }).map((b, i) => (
-          <Reveal key={b.key} className={`grow-block${i % 2 ? ' flip' : ''}`}>
+          <section key={b.key} className={`grow-block${i % 2 ? ' flip' : ''}`}>
             <div className="grow-photo"><img src={s[`${b.key}_image_url`] || b.image} alt="" loading="lazy" width={1024} height={768} /></div>
             <div className="grow-text">
-              <div className="weekly-label"><b.icon size={18} />{s[`${b.key}_label`]}</div>
               {s[`${b.key}_verse_text`] && <blockquote>“{s[`${b.key}_verse_text`]}”</blockquote>}
               {s[`${b.key}_verse_ref`] && <cite>{s[`${b.key}_verse_ref`]}</cite>}
               {b.latest && <p className="verse-latest">Latest: {String(b.latest)}</p>}
               <Button asChild className="grow-cta"><Link to={b.to}>{s[`${b.key}_cta`] || 'Open'} <ArrowRight size={16} /></Link></Button>
             </div>
-          </Reveal>
+          </section>
         ))}
       </section>
     </main>
   );
 }
 
-function Reveal({ className, children }: { className: string; children: ReactNode }) {
-  const ref = useRef<HTMLElement>(null);
-  const [shown, setShown] = useState(false);
-  useEffect(() => {
-    const el = ref.current; if (!el || typeof IntersectionObserver === 'undefined') { setShown(true); return; }
-    const io = new IntersectionObserver(([e]) => { if (e?.isIntersecting) { setShown(true); io.disconnect(); } }, { threshold: 0.15 });
-    io.observe(el); return () => io.disconnect();
-  }, []);
-  return <section ref={ref} className={`${className} reveal${shown ? ' in' : ''}`}>{children}</section>;
-}
 
